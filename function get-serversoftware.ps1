@@ -77,9 +77,9 @@ function get-serversoftware
             Exit-PSSession
             get-pssession | remove-pssession
             $global:InstalledApps = $null
-            $global:InstalledApps = $apps1 | Select-Object | where { $_.Displayname.length -gt 2 }
+            $global:InstalledApps = $apps1 | Select-Object | Where-Object { $_.Displayname.length -gt 2 }
 
-                    
+            <#      
             [string]$Displayname = $global:InstalledApps.Displayname
             [string]$Publisher = $global:InstalledApps.Publisher
             [string]$Displayversion = $global:InstalledApps.Displayversion
@@ -90,7 +90,7 @@ function get-serversoftware
             [string]$IrlInfoAbout = $global:InstalledApps.IrlInfoAbout
             [string]$Comments = $global:InstalledApps.Comments
             [string]$installDate = $global:InstalledApps.installDate
-
+#>
             <#
                $global:outapps =[PSCustomObject]@{
                     SID            = $Server.ServerSID 
