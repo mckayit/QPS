@@ -1,18 +1,21 @@
 #$servername = 'edwqpswsuspr01'
 #$servername = 'POLqpsxchpr01'
+#  $servers = Get-ADComputer -Filter 'operatingsystem -like "*server*" '
+# $creds = Get-Credential
 
-Function get-infozz
+Function get-infozza
 {
-    foreach ($server in $serversa)
+    $i = 1
+    foreach ($server in $servers)
     {
-        $i = 1
+        
 
         #progress bar.
         $paramWriteProgress = @{
             Activity         = "getting Server info"
-            Status           = "Processing [$i] of [$($Serversa.Count)] users"
-            PercentComplete  = (($i / $Serversa.Count) * 100)
-            CurrentOperation = "processing the following Server : [ $($servera.name)]"
+            Status           = "Processing [$i] of [$($Servers.Count)] users"
+            PercentComplete  = (($i / $Servers.Count) * 100)
+            CurrentOperation = "processing the following Server : [ $($server.name)]"
         }
         Write-Progress @paramWriteProgress       
         $i++
@@ -23,7 +26,7 @@ Function get-infozz
 
         # get-manufacture
 
-        $manufacture = get-wmiobject -computername $servername win32_computersystem -Credential $creds
+        $manufacture = get-wmiobject -computername $servername win32_computersystem #-Credential $creds
 
         $Server_Name = $manufacture.name
         $Domain_ = $manufacture.domain
@@ -165,6 +168,106 @@ Model               : VMware Virtual Platform
         $Nic6_DNSDomain = $nics[5].DNSDomain
         $Nic6_Subnet = $nics[5].ipsubnet
         $Nic6_MACAddress = $nics[5].MACAddress
+
+        $Nic7_Index = $nics[6].Index
+        $Nic7_ServiceName = $nics[6].ServiceName
+        $Nic7_Description = $nics[6].Description
+        $Nic7_DHCPEnabled = $nics[6].DHCPEnabled
+        $Nic7_IPAddress = $nics[6].IPAddress
+        $Nic7_DefaultIPGateway = $nics[6].DefaultIPGateway
+        $Nic7_DNSDomain = $nics[6].DNSDomain
+        $Nic7_Subnet = $nics[6].ipsubnet
+        $Nic7_MACAddress = $nics[6].MACAddress
+
+        $Nic8_Index = $nics[7].Index
+        $Nic8_ServiceName = $nics[7].ServiceName
+        $Nic8_Description = $nics[7].Description
+        $Nic8_DHCPEnabled = $nics[7].DHCPEnabled
+        $Nic8_IPAddress = $nics[7].IPAddress
+        $Nic8_DefaultIPGateway = $nics[7].DefaultIPGateway
+        $Nic8_DNSDomain = $nics[7].DNSDomain
+        $Nic8_Subnet = $nics[7].ipsubnet
+        $Nic8_MACAddress = $nics[7].MACAddress
+
+        $Nic9_Index = $nics[8].Index
+        $Nic9_ServiceName = $nics[8].ServiceName
+        $Nic9_Description = $nics[8].Description
+        $Nic9_DHCPEnabled = $nics[8].DHCPEnabled
+        $Nic9_IPAddress = $nics[8].IPAddress
+        $Nic9_DefaultIPGateway = $nics[8].DefaultIPGateway
+        $Nic9_DNSDomain = $nics[8].DNSDomain
+        $Nic9_Subnet = $nics[8].ipsubnet
+        $Nic9_MACAddress = $nics[8].MACAddress
+
+        $Nic10_Index = $nics[9].Index
+        $Nic10_ServiceName = $nics[9].ServiceName
+        $Nic10_Description = $nics[9].Description
+        $Nic10_DHCPEnabled = $nics[9].DHCPEnabled
+        $Nic10_IPAddress = $nics[9].IPAddress
+        $Nic10_DefaultIPGateway = $nics[9].DefaultIPGateway
+        $Nic10_DNSDomain = $nics[9].DNSDomain
+        $Nic10_Subnet = $nics[9].ipsubnet
+        $Nic10_MACAddress = $nics[9].MACAddress
+        
+        $Nic11_Index = $nics[10].Index
+        $Nic11_ServiceName = $nics[10].ServiceName
+        $Nic11_Description = $nics[10].Description
+        $Nic11_DHCPEnabled = $nics[10].DHCPEnabled
+        $Nic11_IPAddress = $nics[10].IPAddress
+        $Nic11_DefaultIPGateway = $nics[10].DefaultIPGateway
+        $Nic11_DNSDomain = $nics[10].DNSDomain
+        $Nic11_Subnet = $nics[10].ipsubnet
+        $Nic11_MACAddress = $nics[10].MACAddress
+        
+        $Nic12_Index = $nics[11].Index
+        $Nic12_ServiceName = $nics[11].ServiceName
+        $Nic12_Description = $nics[11].Description
+        $Nic12_DHCPEnabled = $nics[11].DHCPEnabled
+        $Nic12_IPAddress = $nics[11].IPAddress
+        $Nic12_DefaultIPGateway = $nics[11].DefaultIPGateway
+        $Nic12_DNSDomain = $nics[11].DNSDomain
+        $Nic12_Subnet = $nics[11].ipsubnet
+        $Nic12_MACAddress = $nics[11].MACAddress
+        
+        
+        $Nic13_Index = $nics[12].Index
+        $Nic13_ServiceName = $nics[12].ServiceName
+        $Nic13_Description = $nics[12].Description
+        $Nic13_DHCPEnabled = $nics[12].DHCPEnabled
+        $Nic13_IPAddress = $nics[12].IPAddress
+        $Nic13_DefaultIPGateway = $nics[12].DefaultIPGateway
+        $Nic13_DNSDomain = $nics[12].DNSDomain
+        $Nic13_Subnet = $nics[12].ipsubnet
+        $Nic13_MACAddress = $nics[12].MACAddress
+        
+
+  
+        $Nic14_Index = $nics[13].Index
+        $Nic14_ServiceName = $nics[13].ServiceName
+        $Nic14_Description = $nics[13].Description
+        $Nic14_DHCPEnabled = $nics[13].DHCPEnabled
+        $Nic14_IPAddress = $nics[13].IPAddress
+        $Nic14_DefaultIPGateway = $nics[13].DefaultIPGateway
+        $Nic14_DNSDomain = $nics[13].DNSDomain
+        $Nic14_Subnet = $nics[13].ipsubnet
+        $Nic14_MACAddress = $nics[13].MACAddress
+        
+  
+        $Nic15_Index = $nics[14].Index
+        $Nic15_ServiceName = $nics[14].ServiceName
+        $Nic15_Description = $nics[14].Description
+        $Nic15_DHCPEnabled = $nics[14].DHCPEnabled
+        $Nic15_IPAddress = $nics[14].IPAddress
+        $Nic15_DefaultIPGateway = $nics[14].DefaultIPGateway
+        $Nic15_DNSDomain = $nics[14].DNSDomain
+        $Nic15_Subnet = $nics[14].ipsubnet
+        $Nic15_MACAddress = $nics[14].MACAddress
+        
+
+
+
+
+
 
         #GET-DISKS
         $drvs1 = get-wmiobject -ComputerName $servername win32_volume | where { $_.driveletter -ne 'X:' -and $_.label -ne 'System Reserved' } | sort driveletter 
@@ -349,7 +452,101 @@ Model               : VMware Virtual Platform
             Nic6_DNSDomain             = $Nic6_DNSDomain
             Nic6_Subnet                = [string]$Nic6_Subnet
             Nic6_MACAddress            = [string]$Nic6_MACAddress
+
+            Nic7_Index                 = $Nic7_Index 
+            Nic7_ServiceName           = $Nic7_ServiceName
+            Nic7_Description           = $Nic7_Description
+            Nic7_DHCPEnabled           = $Nic7_DHCPEnabled
+            Nic7_IPAddress             = [string]$Nic7_IPAddress  
+            Nic7_DefaultIPGateway      = [string]$Nic7_DefaultIPGateway
+            Nic7_DNSDomain             = $Nic7_DNSDomain
+            Nic7_Subnet                = [string]$Nic7_Subnet
+            Nic7_MACAddress            = [string]$Nic7_MACAddress
  	
+            
+            Nic8_Index                 = $Nic8_Index 
+            Nic8_ServiceName           = $Nic8_ServiceName
+            Nic8_Description           = $Nic8_Description
+            Nic8_DHCPEnabled           = $Nic8_DHCPEnabled
+            Nic8_IPAddress             = [string]$Nic8_IPAddress  
+            Nic8_DefaultIPGateway      = [string]$Nic8_DefaultIPGateway
+            Nic8_DNSDomain             = $Nic8_DNSDomain
+            Nic8_Subnet                = [string]$Nic8_Subnet
+            Nic8_MACAddress            = [string]$Nic8_MACAddress
+            
+            Nic9_Index                 = $Nic9_Index 
+            Nic9_ServiceName           = $Nic9_ServiceName
+            Nic9_Description           = $Nic9_Description
+            Nic9_DHCPEnabled           = $Nic9_DHCPEnabled
+            Nic9_IPAddress             = [string]$Nic9_IPAddress  
+            Nic9_DefaultIPGateway      = [string]$Nic9_DefaultIPGateway
+            Nic9_DNSDomain             = $Nic9_DNSDomain
+            Nic9_Subnet                = [string]$Nic9_Subnet
+            Nic9_MACAddress            = [string]$Nic9_MACAddress
+
+            
+            Nic10_Index                = $Nic10_Index 
+            Nic10_ServiceName          = $Nic10_ServiceName
+            Nic10_Description          = $Nic10_Description
+            Nic10_DHCPEnabled          = $Nic10_DHCPEnabled
+            Nic10_IPAddress            = [string]$Nic10_IPAddress  
+            Nic10_DefaultIPGateway     = [string]$Nic10_DefaultIPGateway
+            Nic10_DNSDomain            = $Nic10_DNSDomain
+            Nic10_Subnet               = [string]$Nic10_Subnet
+            Nic10_MACAddress           = [string]$Nic10_MACAddress
+            
+            Nic11_Index                = $Nic11_Index 
+            Nic11_ServiceName          = $Nic11_ServiceName
+            Nic11_Description          = $Nic11_Description
+            Nic11_DHCPEnabled          = $Nic11_DHCPEnabled
+            Nic11_IPAddress            = [string]$Nic11_IPAddress  
+            Nic11_DefaultIPGateway     = [string]$Nic11_DefaultIPGateway
+            Nic11_DNSDomain            = $Nic11_DNSDomain
+            Nic11_Subnet               = [string]$Nic11_Subnet
+            Nic11_MACAddress           = [string]$Nic11_MACAddress
+            
+            Nic12_Index                = $Nic12_Index 
+            Nic12_ServiceName          = $Nic12_ServiceName
+            Nic12_Description          = $Nic12_Description
+            Nic12_DHCPEnabled          = $Nic12_DHCPEnabled
+            Nic12_IPAddress            = [string]$Nic12_IPAddress  
+            Nic12_DefaultIPGateway     = [string]$Nic12_DefaultIPGateway
+            Nic12_DNSDomain            = $Nic12_DNSDomain
+            Nic12_Subnet               = [string]$Nic12_Subnet
+            Nic12_MACAddress           = [string]$Nic12_MACAddress
+            
+            Nic13_Index                = $Nic13_Index 
+            Nic13_ServiceName          = $Nic13_ServiceName
+            Nic13_Description          = $Nic13_Description
+            Nic13_DHCPEnabled          = $Nic13_DHCPEnabled
+            Nic13_IPAddress            = [string]$Nic13_IPAddress  
+            Nic13_DefaultIPGateway     = [string]$Nic13_DefaultIPGateway
+            Nic13_DNSDomain            = $Nic13_DNSDomain
+            Nic13_Subnet               = [string]$Nic13_Subnet
+            Nic13_MACAddress           = [string]$Nic13_MACAddress
+
+            Nic14_Index                = $Nic14_Index 
+            Nic14_ServiceName          = $Nic14_ServiceName
+            Nic14_Description          = $Nic14_Description
+            Nic14_DHCPEnabled          = $Nic14_DHCPEnabled
+            Nic14_IPAddress            = [string]$Nic14_IPAddress  
+            Nic14_DefaultIPGateway     = [string]$Nic14_DefaultIPGateway
+            Nic14_DNSDomain            = $Nic14_DNSDomain
+            Nic14_Subnet               = [string]$Nic14_Subnet
+            Nic14_MACAddress           = [string]$Nic14_MACAddress
+                        
+            Nic15_Index                = $Nic15_Index 
+            Nic15_ServiceName          = $Nic15_ServiceName
+            Nic15_Description          = $Nic15_Description
+            Nic15_DHCPEnabled          = $Nic15_DHCPEnabled
+            Nic15_IPAddress            = [string]$Nic15_IPAddress  
+            Nic15_DefaultIPGateway     = [string]$Nic15_DefaultIPGateway
+            Nic15_DNSDomain            = $Nic15_DNSDomain
+            Nic15_Subnet               = [string]$Nic15_Subnet
+            Nic15_MACAddress           = [string]$Nic15_MACAddress
+            
+            
+            
             DRVName1                   =	$DRVName1
             DRVLabel1                  =	$DRVLabel1
             DRVFileSystem1             =	$DRVFileSystem1
