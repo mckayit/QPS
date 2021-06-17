@@ -1,6 +1,6 @@
 #$servername = 'edwqpswsuspr01'
 #$servername = 'POLqpsxchpr01'
-#  $servers = Get-ADComputer -Filter 'operatingsystem -like "*server*" '
+#  $servers = Get-ADComputer -Filter 'operatingsystem -like "*server*" ' -Properties *
 # $creds = Get-Credential
 
 Function get-infozza
@@ -29,7 +29,8 @@ Function get-infozza
         $manufacture = get-wmiobject -computername $servername win32_computersystem #-Credential $creds
 
         $Server_Name = $manufacture.name
-        $Domain_ = $manufacture.domain
+        #$Domain_ = $manufacture.domain
+        $domain_ = ($server.dnshostname.trim($server.name) ).trimstart(".")
         $Manufacturer = $manufacture.manufacturer
         $model = $manufacture.model
         <#
@@ -337,11 +338,11 @@ Model               : VMware Virtual Platform
         #output  
         [PSCustomObject]@{
             #$prop1 = [pscustomobject]@{
-            ServerName                 = [string]$Server_Name         
+            ServerName                 = [string]$Server.name     
             Domain                     = [string]$domain_
             Manufacturer               = [string]$Manufacturer 
             model                      = [string]$model
-            OSVersion                  = [string]$os.Caption
+            OSVersion                  = [string]$server.OperatingSystem
             OSArchitecture             = [string]$os.OSArchitecture
             MemoryGB                   = $mem1
             CanonicalName              = $server.CanonicalName
