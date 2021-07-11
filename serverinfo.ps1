@@ -30,7 +30,7 @@ Function get-infozza
 
         $Server_Name = $manufacture.name
         #$Domain_ = $manufacture.domain
-        $domain_ = ($server.dnshostname.trim($server.name) ).trimstart(".")
+        $domain_ = ($server.dnshostname.trim($server.name)).trimstart(".")  # gets the Domain name from dnshostname by removing the "$name" + "."
         $Manufacturer = $manufacture.manufacturer
         $model = $manufacture.model
         <#
@@ -100,7 +100,7 @@ Model               : VMware Virtual Platform
 
 
         #get-nicinfo
-
+$nics = " "
         $nics = Get-WmiObject -ComputerName $servername  Win32_NetworkAdapterConfiguration
 
 

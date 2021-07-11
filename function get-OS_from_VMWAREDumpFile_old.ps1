@@ -96,7 +96,8 @@ function get-OS_from_VMWAREDumpFile
 
                 try
                 {
-                    $osinfo = get-adcomputer $name  -Server acds.accpol -Credential $acdscreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName | Select-Object OperatingSystemServicePack, OperatingSystem , OperatingSystemVersion , CanonicalName
+                    $osinfo = get-adcomputer -filter 'ipv4address -eq $server.'Primary IP Address' -Server acds.accpol -Credential $acdscreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName | Select-Object OperatingSystemServicePack, OperatingSystem , OperatingSystemVersion , CanonicalName
+                    #$osinfo = get-adcomputer $name  -Server acds.accpol -Credential $acdscreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName | Select-Object OperatingSystemServicePack, OperatingSystem , OperatingSystemVersion , CanonicalName
                     $os = $OSINFo.OperatingSystem
                 }
                 Catch
@@ -126,7 +127,7 @@ function get-OS_from_VMWAREDumpFile
 
                 try
                 {
-                    $osinfo = get-adcomputer $name  -Server desqld.internal -Credential $DESQLDcreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName | Select-Object OperatingSystemServicePack, OperatingSystem , OperatingSystemVersion , CanonicalName
+                    $osinfo = get-adcomputer  -filter 'ipv4address -eq $server.'Primary IP Address' -Server desqld.internal -Credential $DESQLDcreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName | Select-Object OperatingSystemServicePack, OperatingSystem , OperatingSystemVersion , CanonicalName
                     $os = $OSINFo.OperatingSystem
                 }
                 Catch

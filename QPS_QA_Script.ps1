@@ -96,11 +96,14 @@
             1.47     24  June         Lawrence       Fixed bug re emailing report.  now it lets u know to email report to yourself you need to run 'email-report'
             1.48     28  June         Lawrence       Fixed how the date for uptime is shown
             1.50     30  March 2021   Lawrence       Cleaned up Code and fixed a few issues.
+            1.51     09  July  2021   Lawrence       Added BGINNFO Reg Key
+            1.52     12  July  2021   Lawrence       Cleaned up code abit.   and also using get-computerinfo to help fill in lots.
+
 
 #> 
 
 
-$Global:ver = "1.50"
+$Global:ver = "1.52"
 
 
 
@@ -108,7 +111,8 @@ $Global:ver = "1.50"
 
 #checks to see if running as Admin
 clear
-Write-host  "`n`n  *********************************" -ForegroundColor Green
+Write-host  "`n`n"
+write-host  "  *********************************" -ForegroundColor Green
 Write-host  "  *   QA Script Version is $ver   *" -ForegroundColor GREEN
 Write-host  "  *********************************`n`n`n" -ForegroundColor Green
      
@@ -124,70 +128,95 @@ Function Scriptver
 
 function cpu
 {
-    Write-host "Processing..CPU settings."-ForegroundColor green
-    #CPU info
-    $processors = get-wmiobject -computername localhost win32_processor
-    [int]$cores = 0
-    [int]$sockets = 0
-    [string]$test = $null
-    foreach ($proc in $processors)
+    <#
+ #... gets the CPU info on current system
+.SYNOPSIS
+   gets the CPU info on current system
+.DESCRIPTION
+    gets the CPU info on current system
+.PARAMETER one
+    Specifies Pram details.
+.PARAMETER two
+    Specifies Pram details
+.PARAMETER InputObject
+    Specifies the object to be processed.  You can also pipe the objects to this command.
+.EXAMPLE
+    C:\PS>get-cpuinfo 
+    Example of how to use this cmdlet
+.INPUTS
+    Inputs to this cmdlet (if any)
+.OUTPUTS
+    Output from this cmdlet (if any)
+.NOTES
+    
+    Lawrence McKay
+    Lawrence@mckayit.com
+    McKayIT Solutions Pty 
+     
+    Date:    15 Feb 2021
+      
+     ******* Update Version number below when a change is done.*******
+     
+    History
+    Version         Date                Name           Detail
+    ---------------------------------------------------------------------------------------
+    0.0.1           9 July  2021         Lawrence       Initial Coding
+
+#>
+     
+   
+    
+    begin 
     {
-        if ($proc.numberofcores -eq $null)
+        Write-host "Processing..CPU settings."-ForegroundColor green
+    }
+    
+    process 
+    {
+            
+        try 
         {
-            If (-not $Test.contains($proc.SocketDesignation))
-            {
-                $Test = $Test + $proc.SocketDesignation
-                $sockets++
+            $cpuinof_ = Get-ComputerInfo 
+
+
+
+            $cpuinf1 = [PSCustomObject] @{
+                "                 Manufacturer" = $cpuinof_.CsManufacturer
+                "                 Machine Type" = $cpuinof_.CsModel
+                "Number of Logicial Processors" = $cpuinof_.CsNumberOfLogicalProcessors   
+                "           Number of Scockets" = $cpuinof_.CsNumberOfProcessors
+                "               Processor Type" = $cpuinof_. CsProcessors
             }
-            $cores++
+
+
         }
-        else
+        catch 
         {
-            $sockets++
-            $cores = $cores + $proc.numberofcores
-            $LOGProc = $logProc + $proc.numberoflogicalProcessors
+            Write-Host 'ERROR : $(_.Exception.Message)' -ForegroundColor Magenta
         }
     }
-    #“Cores: $cores, Sockets: $sockets”
-    $cpu = [char]0x2551 + "    CPU info.                                                               " + [char]0x2551
     
-    $procManufacturer = get-wmiobject -computername localhost win32_computersystem | select Model, Manufacturer
-    $procManufacturer1 = get-wmiobject -computername localhost win32_processor | Out-String
-  
-    $1 = "                 Manufacturer: "
-    $1 = $1 + $procManufacturer.Manufacturer | Out-String
-    $2 = "                 Machine Type: "
-    $2 = $2 + $procManufacturer.Model | Out-String
-    $3 = "              Number of Cores: "
-    $3 = $3 + $cores | Out-String
+    end
+    {
+        #output
+        $cpu = [char]0x2551 + "    CPU info.                                                               " + [char]0x2551
 
-    $3a = " Number of Logical Processors: "
-    $3a = $3a + $LOGProc | Out-String
-
-
-    $4 = "            Number of Sockets: "
-    $4 = $4 + $sockets | Out-String
-
-    $5 = " CPU Model / Type. "
-    $5 = $5 + $procManufacturer1  | Out-String
-    $global:cpu1 = $1 + $2 + $3 + $3a + $4 + $5
-
-
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $cpu  | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $cpu1 | Out-file  C:\temp\$servername.txt -Append
-        
+        $blank | Out-file  C:\temp\$servername.txt -append
+        $linetop | Out-file  C:\temp\$servername.txt -append
+        $cpu  | Out-file  C:\temp\$servername.txt -append
+        $linebottom | Out-file  C:\temp\$servername.txt -append
+        $cpuinf1 | Out-file  C:\temp\$servername.txt -Append
+            
+    }
+    
 }
 
 function memory
 {
     # Display memory 
     Write-host "Processing..Memory settings."-ForegroundColor green
-    $mem = Get-WmiObject -Class Win32_ComputerSystem 
-    #$mem1 = $mem.TotalPhysicalMemory 
-    $mem1 = [math]::Ceiling($mem.TotalPhysicalMemory / 1024 / 1024 / 1024)
+    # get info from get-computerinfo
+    $mem1 = [math]::Ceiling($CPUINfO_.CsTotalPhysicalMemory / 1024 / 1024 / 1024)
     $memory1 = [char]0x2551 + "    Server RAM in GB                                                        " + [char]0x2551
     $memory2 = "This system has $mem1 GB RAM " 
 
@@ -268,8 +297,9 @@ function domain
     #Server Domain
         
     $dom = [char]0x2551 + "    User Domain          Server Domain                                      " + [char]0x2551
-    $DOM2 = Get-NetIPConfiguration -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
-    $dom1 = "    " + $env:USERDNSDOMAIN + "            " + $DOM2.netprofile.name
+    # $DOM2 = Get-NetIPConfiguration -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+    $CSDomain = $CPUINfO_.CsDomain.tostring()
+    $dom1 = "    " + $env:USERDNSDOMAIN + "            " + $CPUINfO_.CsDomain.tostring()
 
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
@@ -358,81 +388,22 @@ function filepermission
     $fileperd | Out-file  C:\temp\$servername.txt -Append
 }
 
-function iisfolder
-{
-    Write-host "Processing..IIS log folder settings."-ForegroundColor green
-      
-    #if IIS not installed then hide this from report 
-    if (!(Get-Command get-webconfiguration -ErrorAction SilentlyContinue))
-    {
-        write-host ""
-    }
-    else 
-    {
-        #test IIS log folder
-        $iisfldr = [char]0x2551 + "    Test folder exists for the IIS Logs                                     " + [char]0x2551
-        IF (!(TEST-PATH E:\inetpub\logs\LogFiles))
-        { 
-            $iisfldr1 = "E:\inetpub\logs\LogFiles DOES NOT exist"
-        }
-        else
-        {
-            $iisfldr1 = "E:\inetpub\logs\LogFiles DOES exist"
-        }
-
-        $blank | Out-file  C:\temp\$servername.txt -append
-        $linetop | Out-file  C:\temp\$servername.txt -append
-        $iisfldr | Out-file  C:\temp\$servername.txt -Append
-        $linebottom | Out-file  C:\temp\$servername.txt -append
-        $iisfldr1 | Out-file  C:\temp\$servername.txt -Append
-    }
-}
-
-function iisdefaultlocal
-{
-    if (get-command get-webconfiguration -ErrorAction SilentlyContinue)
-    {
-        Write-host "Processing..IIS log folder Location settings."-ForegroundColor green
-        #set iis Default Log location
-        $iisdef = [char]0x2551 + "    IIS Default log location                                                " + [char]0x2551
-        $iisdef1 = get-webconfiguration /System.Applicationhost/Sites/SiteDefaults/logfile | select dir* | Out-String
-    }
-
-}
-
 Function adminpassword
 {
     Write-host "Processing..Local Admin Password settings."-ForegroundColor green
     #Admin account password set never to expire
         
     $adminpwd = [char]0x2551 + "    Local Administrator account password set never to expire                " + [char]0x2551
-    $ADS_UF_PASSWD_CANT_CHANGE = 64        # 0x40
-    $ADS_UF_DONT_EXPIRE_PASSWD = 65536     # 0x10000
 
-    $computer = $null
-    $users = $null
-    $computer = [ADSI]"WinNT://$env:computerName,computer"
-    $Users = $computer.psbase.Children | Where-Object { $_.psbase.schemaclassname -eq 'user' }
-    
-    foreach ($user in $Users.psbase.syncroot)
-    {
-        try
-        {
-            If ( $user.name -eq "Administrator")
-            {
-                $user.userflags = $user.userflags[0] -bor $ADS_UF_DONT_EXPIRE_PASSWD
-                #  $user.SetInfo()
-                $name = $user.FullName | out-string
-                # $name
-                $adminpwd1 = "True   Password set to never Expire" 
-            }
-            else
-            {
-                $adminpwd1 = "False  Should be set to never Expire" 
-            }
-        }
-        catch {}
+    $ex = get-localuser -Name Administrator | select -ExpandProperty passwordexpires
+    $adminpwd1 = "False   Password set to EXPIRE" 
+    if (!($ex) )
+    { 
+        $adminpwd1 = "True   Password set to never Expire" 
     }
+    $adminpwd1
+
+
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
     $adminpwd | Out-file  C:\temp\$servername.txt -Append
@@ -513,15 +484,15 @@ function bginfo
 {
     Write-host "Processing..Checking BG Info settings."-ForegroundColor green
             
-    $bginf = [char]0x2551 + "    Checking BG Info build date key set                                     " + [char]0x2551  
-    $bgin = get-ItemProperty  -path HKLM:\SOFTWARE\Wow6432Node\QPS\SysInfo -name Build_Date
+    $bginf = [char]0x2551 + "    Checking BG Info REG Keys set                                           " + [char]0x2551  
+    $bgin = get-ItemProperty  -path HKLM:\SOFTWARE\BGinfo
     $bginf1 = $bgin.Build_date
 
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
     $bginf | Out-file  C:\temp\$servername.txt -Append
     $linebottom | Out-file  C:\temp\$servername.txt -append
-    $bginf1 | Out-file  C:\temp\$servername.txt -Append 
+    $bgin | Out-file  C:\temp\$servername.txt -Append 
 
 }
 
@@ -643,37 +614,6 @@ function softwwareinstalled
     $linebottom | Out-file  C:\temp\$servername.txt -append
     $appsinst1 | Out-file  C:\temp\$servername.txt -Append   
     $appsinst2 | Out-file  C:\temp\$servername.txt -Append     
-
-}
-
-function Eventlogerrors
-{
-    Write-host "Processing..Checking Eventviewer Errors settings."-ForegroundColor green
-            
-    $evt = [char]0x2551 + "    Windows Event Log Errors                                                " + [char]0x2551 
-    $evt0 = Get-WinEvent -ListLog 'Application', 'System', 'Security' -ErrorAction SilentlyContinue | Where RecordCount -gt 0 |`
-        ForEach-Object -Process { Get-WinEvent -FilterHashtable @{LogName = $_.LogName; StartTime = (Get-Date).AddDays(-1); Level = 1, 2, 3 } -ErrorAction SilentlyContinue }
-        
-    $evt1 = Get-WinEvent -ListLog 'Application', 'System', 'Security' -ErrorAction SilentlyContinue | Where RecordCount -gt 0 |`
-        ForEach-Object -Process { Get-WinEvent -FilterHashtable @{LogName = $_.LogName; StartTime = (Get-Date).AddDays(-1); Level = 1, 2, 3 } -ErrorAction SilentlyContinue } | `
-        Select-Object LogName, LevelDisplayName, Id, Level, TimeCreated, Message | sort LogName | ft -auto | Out-String
-
-    if ($evt0.Count -gt 0)
-    {
-        $evt1 = "Eventlog Errors Found $evt1"
-    }
-        
-    else
-    {
-        $evt1 = "No Errors Detected  "
-    }
-
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $evt | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $evt1 | Out-file  C:\temp\$servername.txt -Append    
-
 
 }
 
@@ -850,6 +790,37 @@ function CheckNTP
 
 }
 
+function Eventlogerrors
+{
+    Write-host "Processing..Checking Eventviewer Errors settings."-ForegroundColor green
+            
+    $evt = [char]0x2551 + "    Windows Event Log Errors                                                " + [char]0x2551 
+    $evt0 = Get-WinEvent -ListLog 'Application', 'System', 'Security' -ErrorAction SilentlyContinue | Where RecordCount -gt 0 |`
+        ForEach-Object -Process { Get-WinEvent -FilterHashtable @{LogName = $_.LogName; StartTime = (Get-Date).AddDays(-1); Level = 1, 2, 3 } -ErrorAction SilentlyContinue }
+        
+    $evt1 = Get-WinEvent -ListLog 'Application', 'System', 'Security' -ErrorAction SilentlyContinue | Where RecordCount -gt 0 |`
+        ForEach-Object -Process { Get-WinEvent -FilterHashtable @{LogName = $_.LogName; StartTime = (Get-Date).AddDays(-1); Level = 1, 2, 3 } -ErrorAction SilentlyContinue } | `
+        Select-Object LogName, LevelDisplayName, Id, Level, TimeCreated, Message | sort LogName | ft -auto | Out-String
+
+    if ($evt0.Count -gt 0)
+    {
+        $evt1 = "Eventlog Errors Found $evt1"
+    }
+        
+    else
+    {
+        $evt1 = "No Errors Detected  "
+    }
+
+    $blank | Out-file  C:\temp\$servername.txt -append
+    $linetop | Out-file  C:\temp\$servername.txt -append
+    $evt | Out-file  C:\temp\$servername.txt -Append
+    $linebottom | Out-file  C:\temp\$servername.txt -append
+    $evt1 | Out-file  C:\temp\$servername.txt -Append    
+
+
+}
+
 function cleareventlogs
 {
     write-host  "`n Clearing all Eventlogs." -ForegroundColor green
@@ -934,18 +905,34 @@ function iisdefaultlocal
     }
 }
 
-Function QCAD-VAS-folder-permissions
+function iisfolder
 {
-    Write-host "Checking QCAD-VAS-folder-permissions" -ForegroundColor green
-    $FilePerdvas = ""
-                   
-    $FilePervas = [char]0x2551 + "    Check File Permissions for QCAD VAS servers.                            " + [char]0x2551
-    $FilePerdvas = $FilePerdvas + "Checking permissions for D:\Oracle\Admin\prcaddg\adump"
-    $FilePerdvas = $FilePerdvas + (get-acl D:\Oracle\Admin\prcaddg\adump | fl | out-string)
+    Write-host "Processing..IIS log folder settings."-ForegroundColor green
+      
+    #if IIS not installed then hide this from report 
+    if (!(Get-Command get-webconfiguration -ErrorAction SilentlyContinue))
+    {
+        write-host ""
+    }
+    else 
+    {
+        #test IIS log folder
+        $iisfldr = [char]0x2551 + "    Test folder exists for the IIS Logs                                     " + [char]0x2551
+        IF (!(TEST-PATH E:\inetpub\logs\LogFiles))
+        { 
+            $iisfldr1 = "E:\inetpub\logs\LogFiles DOES NOT exist"
+        }
+        else
+        {
+            $iisfldr1 = "E:\inetpub\logs\LogFiles DOES exist"
+        }
 
-    $FilePerdvas = $FilePerdvas + "Checking permissions for D:\Oracle\Admin\prcad\adump"
-    $FilePerdvas = $FilePerdvas + (get-acl D:\Oracle\Admin\prcad\adump | fl | out-string)
-
+        $blank | Out-file  C:\temp\$servername.txt -append
+        $linetop | Out-file  C:\temp\$servername.txt -append
+        $iisfldr | Out-file  C:\temp\$servername.txt -Append
+        $linebottom | Out-file  C:\temp\$servername.txt -append
+        $iisfldr1 | Out-file  C:\temp\$servername.txt -Append
+    }
 }
 
 Function Windowsver
@@ -953,7 +940,7 @@ Function Windowsver
     Write-host "Processing.. Windows Version" -ForegroundColor green
                       
     $windowsversion = [char]0x2551 + "    Checking Windows Version                                                " + [char]0x2551
-    $windowsversion1 = (Get-WmiObject -class Win32_OperatingSystem).Caption
+    $windowsversion1 = $cpuinof_.OsName
 
 
     $blank | Out-file  C:\temp\$servername.txt -append
@@ -1056,6 +1043,26 @@ Function Logoff
     Shutdown /l /f 
 }
 
+Function get-Performance
+{
+    Write-host "Processing..getting Performance settings." -ForegroundColor Green
+ 
+    #getting the Info for the server. 
+    $perf = Get-ItemProperty -path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects 
+    $Perfsettings = 'Not set correctly"'             
+    if ( $perf.VisualFXSetting -eq '2')
+    {
+        $Perfsettings = "Server set for Best Performance"
+    }                                                             
+    
+
+    $OUTitle = [char]0x2551 + "    Server Performance Settings                                             " + [char]0x2551
+    $blank | Out-file  C:\temp\$servername.txt -append
+    $linetop | Out-file  C:\temp\$servername.txt -append
+    $oUTitle | Out-file  C:\temp\$servername.txt -append
+    $linebottom | Out-file  C:\temp\$servername.txt -append
+    $Perfsettings | Out-file  C:\temp\$servername.txt -append
+}
 
       
 <#
@@ -1115,12 +1122,13 @@ NLBsettings
 Domain
 get-OU
 descript
+BGINFO
+get-Performance
 iisfolder
 iisdefaultlocal
 Drives
 filepermission     #No longer changed
-bginfo
-security           #do not use the /Security Profile now.  2019 is secure by detault.
+#security           #do not use the /Security Profile now.  2019 is secure by detault.
 adminpassword
 Services-check
 Windozupdates
