@@ -85,7 +85,7 @@ function Get-OS_from_VMWareDump
              
     }
     
-    process 
+    +
     {
             
         try 
