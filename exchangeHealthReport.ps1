@@ -1,62 +1,45 @@
 <#
 .SYNOPSIS
 Test-ExchangeServerHealth.ps1 - Exchange Server Health Check Script.
-
 .DESCRIPTION 
 Performs a series of health checks on Exchange servers and DAGs
 and outputs the results to screen, and optionally to log file, HTML report,
 and HTML email.
-
 Use the ignorelist.txt file to specify any servers, DAGs, or databases you
 want the script to ignore (eg test/dev servers).
-
 .OUTPUTS
 Results are output to screen, as well as optional log file, HTML report, and HTML email
-
 .PARAMETER Server
 Perform a health check of a single server
-
 .PARAMETER ReportMode
 Set to $true to generate a HTML report. A default file name is used if none is specified.
-
 .PARAMETER ReportFile
 Allows you to specify a different HTML report file name than the default.
-
 .PARAMETER SendEmail
 Sends the HTML report via email using the SMTP configuration within the script.
-
 .PARAMETER AlertsOnly
 Only sends the email report if at least one error or warning was detected.
-
 .PARAMETER Log
 Writes a log file to help with troubleshooting.
-
 .EXAMPLE
 .\Test-ExchangeServerHealth.ps1
 Checks all servers in the organization and outputs the results to the shell window.
-
 .EXAMPLE
 .\Test-ExchangeServerHealth.ps1 -Server HO-EX2010-MB1
 Checks the server HO-EX2010-MB1 and outputs the results to the shell window.
-
 .EXAMPLE
 .\Test-ExchangeServerHealth.ps1 -ReportMode -SendEmail
 Checks all servers in the organization, outputs the results to the shell window, a HTML report, and
 emails the HTML report to the address configured in the script.
-
 .LINK
 https://practical365.com/exchange-server/powershell-script-exchange-server-health-check-report/
-
 .NOTES
 Written by: Paul Cunningham
-
 Find me on:
-
 * My Blog:	https://paulcunningham.me
 * Twitter:	https://twitter.com/paulcunningham
 * LinkedIn:	https://au.linkedin.com/in/cunninghamp/
 * Github:	https://github.com/cunninghamp
-
 Additional Credits (code contributions and testing):
 - Chris Brown, http://twitter.com/chrisbrownie
 - Ingmar Brückner
@@ -68,23 +51,17 @@ Additional Credits (code contributions and testing):
 - Ryan
 - Rob Silver
 - andrewcr7, https://github.com/andrewcr7
-
 License:
-
 The MIT License (MIT)
-
 Copyright (c) 2017 Paul Cunningham
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -92,7 +69,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 Change Log
 V1.00, 05/07/2012 - Initial version
 V1.01, 05/08/2012 - Minor bug fixes and removed Edge Tranport checks
@@ -188,10 +164,10 @@ $logfile = "$myDir\exchangeserverhealth.log"
 #...................................
 
 $smtpsettings = @{
-    To         = "administrator@exchangeserverpro.net"
-    From       = "exchangeserver@exchangeserverpro.net"
+    To         = "lawrence.mckay@psba.qld.gov.au"
+    From       = "lawrence.mckay@psba.qld.gov.au"
     Subject    = "$reportemailsubject - $now"
-    SmtpServer = "smtp.exchangeserverpro.net"
+    SmtpServer = "smtp.police.qld.gov.au"
 }
 
 

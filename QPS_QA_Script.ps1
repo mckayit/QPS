@@ -97,7 +97,7 @@
             1.48     28  June         Lawrence       Fixed how the date for uptime is shown
             1.50     30  March 2021   Lawrence       Cleaned up Code and fixed a few issues.
             1.51     09  July  2021   Lawrence       Added BGINNFO Reg Key
-            1.52     12  July  2021   Lawrence       Cleaned up code abit.   and also using get-computerinfo to help fill in lots.
+            1.52     12  July  2021   Lawrence       Cleaned up code abit.   and also using get-computerinfo to
 
 
 #> 
@@ -176,16 +176,16 @@ function cpu
             
         try 
         {
-            $cpuinof_ = Get-ComputerInfo 
+            $CPUINfO_ = Get-ComputerInfo 
 
 
 
             $cpuinf1 = [PSCustomObject] @{
-                "                 Manufacturer" = $cpuinof_.CsManufacturer
-                "                 Machine Type" = $cpuinof_.CsModel
-                "Number of Logicial Processors" = $cpuinof_.CsNumberOfLogicalProcessors   
-                "           Number of Scockets" = $cpuinof_.CsNumberOfProcessors
-                "               Processor Type" = $cpuinof_. CsProcessors
+                "                 Manufacturer" = $CPUINfO_.CsManufacturer
+                "                 Machine Type" = $CPUINfO_.CsModel
+                "Number of Logicial Processors" = $CPUINfO_.CsNumberOfLogicalProcessors   
+                "           Number of Scockets" = $CPUINfO_.CsNumberOfProcessors
+                "               Processor Type" = $CPUINfO_. CsProcessors
             }
 
 
@@ -315,7 +315,9 @@ function descript
     #server Description
     $pcdesc = Get-WmiObject Win32_operatingSystem 
     $desc = [char]0x2551 + "    Server Description                                                      " + [char]0x2551
-    $desc1 = $pcdesc.description
+    $desc1 = "Local Description: $pcdesc.description"
+    $desc1 += "`n   AD Description: $(get-adcomputer edwqpswebnp06 -Properties  Description |select -ExpandProperty Description)"
+
 
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
