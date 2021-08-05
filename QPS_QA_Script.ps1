@@ -176,16 +176,16 @@ function cpu
             
         try 
         {
-            $CPUINfO_ = Get-ComputerInfo 
+            $global:CPUINfO_ = Get-ComputerInfo 
 
 
 
             $cpuinf1 = [PSCustomObject] @{
-                "                 Manufacturer" = $CPUINfO_.CsManufacturer
-                "                 Machine Type" = $CPUINfO_.CsModel
-                "Number of Logicial Processors" = $CPUINfO_.CsNumberOfLogicalProcessors   
-                "           Number of Scockets" = $CPUINfO_.CsNumberOfProcessors
-                "               Processor Type" = $CPUINfO_. CsProcessors
+                "                 Manufacturer" = $global:CPUINfO_.CsManufacturer
+                "                 Machine Type" = $global:CPUINfO_.CsModel
+                "Number of Logicial Processors" = $global:CPUINfO_.CsNumberOfLogicalProcessors   
+                "           Number of Scockets" = $global:CPUINfO_.CsNumberOfProcessors
+                "               Processor Type" = $global:CPUINfO_. CsProcessors
             }
 
 
@@ -216,7 +216,7 @@ function memory
     # Display memory 
     Write-host "Processing..Memory settings."-ForegroundColor green
     # get info from get-computerinfo
-    $mem1 = [math]::Ceiling($CPUINfO_.CsTotalPhysicalMemory / 1024 / 1024 / 1024)
+    $mem1 = [math]::Ceiling($global:CPUINfO_.CsTotalPhysicalMemory / 1024 / 1024 / 1024)
     $memory1 = [char]0x2551 + "    Server RAM in GB                                                        " + [char]0x2551
     $memory2 = "This system has $mem1 GB RAM " 
 
@@ -298,8 +298,8 @@ function domain
         
     $dom = [char]0x2551 + "    User Domain          Server Domain                                      " + [char]0x2551
     # $DOM2 = Get-NetIPConfiguration -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
-    $CSDomain = $CPUINfO_.CsDomain.tostring()
-    $dom1 = "    " + $env:USERDNSDOMAIN + "            " + $CPUINfO_.CsDomain.tostring()
+    $CSDomain = $global:CPUINfO_.CsDomain.tostring()
+    $dom1 = "    " + $env:USERDNSDOMAIN + "            " + $global:CPUINfO_.CsDomain.tostring()
 
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
@@ -315,8 +315,8 @@ function descript
     #server Description
     $pcdesc = Get-WmiObject Win32_operatingSystem 
     $desc = [char]0x2551 + "    Server Description                                                      " + [char]0x2551
-    $desc1 = "Local Description: $pcdesc.description"
-    $desc1 += "`n   AD Description: $(get-adcomputer edwqpswebnp06 -Properties  Description |select -ExpandProperty Description)"
+    $desc1 = "Local Description: $($pcdesc.description.tostring())"
+    $desc1 += "`n   AD Description: $(get-adcomputer $servername -Properties  Description |select -ExpandProperty Description)"
 
 
     $blank | Out-file  C:\temp\$servername.txt -append
@@ -325,6 +325,22 @@ function descript
     $linebottom | Out-file  C:\temp\$servername.txt -append
     $desc1 | Out-file  C:\temp\$servername.txt -Append
 
+
+}
+function IsActivated
+{
+    $activ = Get-CIMInstance -query "select Name, Description, LicenseStatus from SoftwareLicensingProduct where LicenseStatus=1" | select -ExpandProperty LicenseStatus
+    $ActivationStatus = "Not Activated"
+    if ($activ -eq "1") { $ActivationStatus = "This Windows Operating System Version is Activated" }
+
+
+
+    $OUTitle = [char]0x2551 + "    Server Activation Status                                                " + [char]0x2551
+    $blank | Out-file  C:\temp\$servername.txt -append
+    $linetop | Out-file  C:\temp\$servername.txt -append
+    $oUTitle | Out-file  C:\temp\$servername.txt -append
+    $linebottom | Out-file  C:\temp\$servername.txt -append
+    $ActivationStatus | Out-file  C:\temp\$servername.txt -append
 
 }
 
@@ -418,7 +434,7 @@ function Windozupdates
     Write-host "Processing..Windozs Update settings."-ForegroundColor green
     #Number of windows updates
              
-    $winhotfix = [char]0x2551 + "    Number of windows updates should be Approx 15                           " + [char]0x2551
+    $winhotfix = [char]0x2551 + "    Number of windows updates should be Approx 8 for 2019                  " + [char]0x2551
     $winhotfix1 = (Get-HotFix).count# | measure | fl Count | Out-String
 
     $blank | Out-file  C:\temp\$servername.txt -append
@@ -838,9 +854,12 @@ Function VMwarecheck
               
     $VMTools = [char]0x2551 + "    Checking to see if VMware Tools are running                             " + [char]0x2551
 
-    if ($cpu1 -like '*VMware*')
+    $VMTools1 = "This is a Physical Server."
+    #write-host " This is a Physical Server." 
+
+    if ($global:CPUINfO_.CsManufacturer -like '*VMware*')
     {
-        if (!(Get-Process | where name -like vmtool*))
+        if (!(Get-Process | where name -like "*vmtool*"))
         {
             $VMTools1 = "VMware Tools are NOT running"
         }
@@ -849,11 +868,21 @@ Function VMwarecheck
             $VMTools1 = "VMware Tools are running"
         }
     }
-    else
+    
+    if ($global:CPUINfO_.CsManufacturer -like '*nutan*')
     {
-        $VMTools1 = "This is a Physical Server."
-        write-host " This is a Physical Server."  
+        if (!(Get-Process | where name -like "*nutan*"))
+        {
+            $VMTools1 = "VNutanix Tools are NOT running"
+        }
+        else 
+        {
+            $VMTools1 = "Nutanix Tools are running"
+        }
+    
     }
+    
+  
 
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
@@ -942,7 +971,7 @@ Function Windowsver
     Write-host "Processing.. Windows Version" -ForegroundColor green
                       
     $windowsversion = [char]0x2551 + "    Checking Windows Version                                                " + [char]0x2551
-    $windowsversion1 = $cpuinof_.OsName
+    $windowsversion1 = $global:CPUINfO_.OsName
 
 
     $blank | Out-file  C:\temp\$servername.txt -append
@@ -1116,6 +1145,7 @@ cleanupinstallscripts
 Scriptver
 cpu
 Windowsver
+IsActivated
 VMwarecheck
 memory
 pagefile
@@ -1129,7 +1159,7 @@ get-Performance
 iisfolder
 iisdefaultlocal
 Drives
-filepermission     #No longer changed
+#filepermission     #No longer changed
 #security           #do not use the /Security Profile now.  2019 is secure by detault.
 adminpassword
 Services-check
