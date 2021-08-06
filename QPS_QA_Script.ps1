@@ -98,12 +98,14 @@
             1.50     30  March 2021   Lawrence       Cleaned up Code and fixed a few issues.
             1.51     09  July  2021   Lawrence       Added BGINNFO Reg Key
             1.52     12  July  2021   Lawrence       Cleaned up code abit.   and also using get-computerinfo to
+            1.54     06  aug   2021   Lawrence       fixed up issue with Clustering as well as PS AD tools
+            1.55     06  Aug   2021   Lawrence       Fixed up how CPU displayed   big Thanks to Rana..
 
 
 #> 
 
 
-$Global:ver = "1.52"
+$Global:ver = "1.55"
 
 
 
@@ -178,16 +180,19 @@ function cpu
         {
             $global:CPUINfO_ = Get-ComputerInfo 
 
-
-
-            $cpuinf1 = [PSCustomObject] @{
-                "                 Manufacturer" = $global:CPUINfO_.CsManufacturer
-                "                 Machine Type" = $global:CPUINfO_.CsModel
+            $prop = [ordered]@{
+                "Manufacturer"                  = $global:CPUINfO_.CsManufacturer
+                "Machine Type"                  = $global:CPUINfO_.CsModel
                 "Number of Logicial Processors" = $global:CPUINfO_.CsNumberOfLogicalProcessors   
-                "           Number of Scockets" = $global:CPUINfO_.CsNumberOfProcessors
-                "               Processor Type" = $global:CPUINfO_. CsProcessors
+                "Number of Sockets"             = $global:CPUINfO_.CsNumberOfProcessors
             }
 
+            $i = 0
+            foreach ($cpu in $($global:CPUINfO_.CsProcessors.Name))
+            {
+                $prop.add("Processor Type_$($i)", "$cpu")
+                $i++
+            }
 
         }
         catch 
@@ -205,7 +210,7 @@ function cpu
         $linetop | Out-file  C:\temp\$servername.txt -append
         $cpu  | Out-file  C:\temp\$servername.txt -append
         $linebottom | Out-file  C:\temp\$servername.txt -append
-        $cpuinf1 | Out-file  C:\temp\$servername.txt -Append
+        [PScustomobject]$prop | Out-file  C:\temp\$servername.txt -Append
             
     }
     
@@ -352,7 +357,7 @@ function NLBsettings
     
     if ($nlb)
     {
-        'Installed'
+        #'Installed'
         $nlbcluster = Get-NlbCluster  -HostName $env:COMPUTERNAME -WarningAction SilentlyContinue -erroraction 'silentlycontinue'   | Out-String 
     
         if ($nlbcluster)
@@ -378,6 +383,16 @@ function NLBsettings
             $clstnode3 | Out-file  C:\temp\$servername.txt -Append
             $clstnode4 | Out-file  C:\temp\$servername.txt -Append
 
+        }
+        else
+        {
+            $clst = [char]0x2551 + "    Cluster Info                                                            " + [char]0x2551
+            $CNotINSTALLED = "Network LoadBalanceing installed but not configured."   
+            $blank | Out-file  C:\temp\$servername.txt -append
+            $linetop | Out-file  C:\temp\$servername.txt -append
+            $clst | Out-file  C:\temp\$servername.txt -Append
+            $linebottom | Out-file  C:\temp\$servername.txt -append
+            $CNotINSTALLED | Out-file  C:\temp\$servername.txt -append
         }
 
     }
@@ -419,7 +434,7 @@ Function adminpassword
     { 
         $adminpwd1 = "True   Password set to never Expire" 
     }
-    $adminpwd1
+    #$adminpwd1
 
 
     $blank | Out-file  C:\temp\$servername.txt -append
@@ -433,8 +448,8 @@ function Windozupdates
 {
     Write-host "Processing..Windozs Update settings."-ForegroundColor green
     #Number of windows updates
-             
-    $winhotfix = [char]0x2551 + "    Number of windows updates should be Approx 8 for 2019                  " + [char]0x2551
+              
+    $winhotfix = [char]0x2551 + "    Number of windows updates should be Approx 8 for 2019                   " + [char]0x2551
     $winhotfix1 = (Get-HotFix).count# | measure | fl Count | Out-String
 
     $blank | Out-file  C:\temp\$servername.txt -append
@@ -968,7 +983,7 @@ function iisfolder
 
 Function Windowsver
 {
-    Write-host "Processing.. Windows Version" -ForegroundColor green
+    Write-host "Processing..Windows Version" -ForegroundColor green
                       
     $windowsversion = [char]0x2551 + "    Checking Windows Version                                                " + [char]0x2551
     $windowsversion1 = $global:CPUINfO_.OsName
@@ -1107,9 +1122,14 @@ $Scriptver = "QA Script Ver $ver"
 $name = "                                                    $servername"
 $blank = " " 
 Write-host "Installing Powershell AD Tools.  This will be cleaned up at end of process." -ForegroundColor Cyan
-install-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
-#Install-WindowsFeature RSAT-AD-Tools
 
+#gets status of PS AD tools installed or not. 
+$rsat_ad = Get-WindowsFeature RSAT-AD-PowerShell | select -ExpandProperty installstate
+if ($rsat_ad -notmatch 'installed')
+{
+    install-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
+    #Install-WindowsFeature RSAT-AD-Tools
+}
 #check to see if c:\temp Exists for Report.
 if ( !$( Test-Path c:\temp )) { mkdir 'c:\temp' }
 
@@ -1186,4 +1206,7 @@ Write-host ="`n`n To send this report to yourself enter 'send-report' " -Backgro
 
 #cleaning up the Powershell RSAT module.
 Write-host "Removing Powershell AD Tools.  As installed at start of Script." -ForegroundColor Cyan
-uninstall-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
+if ($rsat_ad -notmatch 'installed')
+{
+    uninstall-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
+}
