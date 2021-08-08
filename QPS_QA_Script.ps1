@@ -190,7 +190,7 @@ function cpu
             $i = 0
             foreach ($cpu in $($global:CPUINfO_.CsProcessors.Name))
             {
-                $prop.add("Processor Type_$($i)", "$cpu")
+                $prop.add("Socket_$($i)", "$cpu")
                 $i++
             }
 
