@@ -102,6 +102,12 @@
             1.55     06  Aug   2021   Lawrence       Fixed up how CPU displayed   big Thanks to Rana..
             1.56     11  Aug   2021   Lawrence       Fixed up AD and Local Description Format issue
             1.57     11  Aug   2021   Lawrence       Added IPv6 Check to see if enabled. 
+                                                     Added Check for BGInfo Reg Keys
+                                                     Added Check for Performance settings.
+                                                     Shows if Nutanix tools installed for a Nutanis System as well as VMWare tools
+                                                     Fixed Title (Server name) display issue.
+
+
 
 #> 
 
@@ -247,7 +253,7 @@ function pagefile
     $PGSize2 = "Pagefile set as Auto managed."
     $PGSize3 = (gwmi Win32_ComputerSystem).AutomaticManagedPagefile
     $PGSize2 = $PGSize2 + $PGSize3
-    $PGSize3a = "       NOTE: It should be false"
+    $PGSize3a = " "#      NOTE: It should be false"
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
     $PGSize | Out-file  C:\temp\$servername.txt -Append
@@ -263,7 +269,10 @@ function networksettingsipv6
     Write-host "Processing..Network settings IPv6."-ForegroundColor green
     $netwrkv6 = [char]0x2551 + "    IPv6 Network settings.                                                  " + [char]0x2551
     $netwrk1v6 = "IPv6 is Disabled. (Expected)"
-    if (Get-NetAdapterBinding |where {$_.DisplayName -match "IPv6" -and $_.enabled -eq 'true'} ){$netwrk1v6=  'IPv6 Enabled  please disable'}
+    #if IPv6 exists 
+    if (Get-NetAdapterBinding |where {$_.DisplayName -match "IPv6" -and $_.enabled -eq 'true'} ){
+        $netwrk1v6=  'IPv6 Enabled  ---> *** Please Disable ***'
+    }
     
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
@@ -1170,10 +1179,10 @@ $line = repeat-string $ln20 110
 
 
 #setting up the Title box.
-$Title1 = $ln1 + $line + $ln2
-$Title2 = $ln3 + $line + $ln4
+$Title1 = $line 
+$Title2 = $line 
 
-$Title10 = [char]0x2551 + "                                               " + $servername + "                                                 " + [char]0x2551
+$Title10 = "                                               " + $servername  
 
 $Title1  | Out-file  C:\temp\$servername.txt 
 $Title10 | Out-file  C:\temp\$servername.txt -append 
