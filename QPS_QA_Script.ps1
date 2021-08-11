@@ -101,12 +101,12 @@
             1.54     06  aug   2021   Lawrence       fixed up issue with Clustering as well as PS AD tools
             1.55     06  Aug   2021   Lawrence       Fixed up how CPU displayed   big Thanks to Rana..
             1.56     11  Aug   2021   Lawrence       Fixed up AD and Local Description Format issue
-
+            1.57     11  Aug   2021   Lawrence       Added IPv6 Check to see if enabled. 
 
 #> 
 
 
-$Global:ver = "1.58"
+$Global:ver = "1.57"
 
 
 
