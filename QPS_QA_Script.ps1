@@ -25,7 +25,15 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+.PARAMETER SendEmail
+    this is a Switch to send Email to email address prompted for when script run
+.EXAMPLE
+# This will not send email with copy of QA Report.
+    C:\PS>QPS_QA_Script   
+## This will send email with copy of QA Report.
+    C:\PS>QPS_QA_Script -sendemail
+     
+    Example of how to use this cmdlet
 
 
     Author:
@@ -106,11 +114,25 @@
                                                      Added Check for Performance settings.
                                                      Shows if Nutanix tools installed for a Nutanis System as well as VMWare tools
                                                      Fixed Title (Server name) display issue.
+                                                     Added Commandline switch to auto prompt for Creds and send email
+
 
 
 
 #> 
+[CmdletBinding()]
+	param
+	(
+		[Switch]$Sendemail
+	)
+	
 
+if ($Sendemail) # Sendemail switch used
+				{
+                 Add-Type -AssemblyName Microsoft.VisualBasic
+$emailaddress=[Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Address to send Repot to.:','Enter Email Address')
+
+                }
 
 $Global:ver = "1.57"
 
@@ -1108,8 +1130,8 @@ Function Send-report
     $emailcreds = Get-Credential   -Message "Enter your PRDS standard user code. Do not enter Domain.  This is required to send email only."
     $global:emailcreds = $emailcreds
     $emailaddress1 = get-aduser $emailcreds.username -Properties *
-    $Global:emailaddress = $emailaddress1.mail
-    Send-MailMessage -From $emailaddress -Subject "QA Report for: $env:computername" -To $emailaddress -Body "QA Report for `n`n   Computername  $env:computername" -Attachments C:\temp\$servername.txt -Credential $emailcreds -Port 25 -SmtpServer smtp.police.qld.gov.au
+    #$Global:emailaddress = $emailaddress1.mail
+    Send-MailMessage -From "Server_QA-Reports@PRDS.QLDPOL" -Subject "QA Report for: $env:computername" -To $emailaddress -Body "QA Report for `n`n   Computername  $env:computername" -Attachments C:\temp\$servername.txt  -Port 25 -SmtpServer smtp.police.qld.gov.au
 
 
 }
@@ -1234,7 +1256,10 @@ Write-host "`n`n$env:computername.txt file is located in c:\temp" -BackgroundCol
 
 #Comment this out as well as the line above if you do not want to email the report to you.
 Write-host ="`n`n To send this report to yourself enter 'send-report' " -BackgroundColor green -ForegroundColor Red 
-
+if ($Sendemail) # Sendemail switch used
+				{
+                    Send-report 
+                }
 #cleaning up the Powershell RSAT module.
 Write-host "Removing Powershell AD Tools.  As installed at start of Script." -ForegroundColor Cyan
 if ($rsat_ad -notmatch 'installed')
