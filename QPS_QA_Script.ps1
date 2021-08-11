@@ -100,12 +100,13 @@
             1.52     12  July  2021   Lawrence       Cleaned up code abit.   and also using get-computerinfo to
             1.54     06  aug   2021   Lawrence       fixed up issue with Clustering as well as PS AD tools
             1.55     06  Aug   2021   Lawrence       Fixed up how CPU displayed   big Thanks to Rana..
+            1.56     11  Aug   2021   Lawrence       Fixed up AD and Local Description Format issue
 
 
 #> 
 
 
-$Global:ver = "1.55"
+$Global:ver = "1.58"
 
 
 
@@ -128,9 +129,8 @@ Function Scriptver
     Write-host  "`n`n       Script Version is $ScriptVersion `n`n`n" -ForegroundColor Yellow
 }
 
-function cpu
-{
-    <#
+function cpu{
+<#
  #... gets the CPU info on current system
 .SYNOPSIS
    gets the CPU info on current system
@@ -186,7 +186,7 @@ function cpu
                 "Number of Logicial Processors" = $global:CPUINfO_.CsNumberOfLogicalProcessors   
                 "Number of Sockets"             = $global:CPUINfO_.CsNumberOfProcessors
             }
-
+            # Adding the Cockets to a Seperate Line
             $i = 0
             foreach ($cpu in $($global:CPUINfO_.CsProcessors.Name))
             {
@@ -221,7 +221,7 @@ function memory
     # Display memory 
     Write-host "Processing..Memory settings."-ForegroundColor green
     # get info from get-computerinfo
-    $mem1 = [math]::Ceiling($global:CPUINfO_.CsTotalPhysicalMemory / 1024 / 1024 / 1024)
+    $mem1 =  ([math]::Round(($global:CPUINfO_.CsTotalPhysicalMemory /1GB),2))
     $memory1 = [char]0x2551 + "    Server RAM in GB                                                        " + [char]0x2551
     $memory2 = "This system has $mem1 GB RAM " 
 
@@ -256,6 +256,22 @@ function pagefile
     $PGSize2 | Out-file  C:\temp\$servername.txt -Append
     $PGSize3a | Out-file  C:\temp\$servername.txt -Append
 }
+
+function networksettingsipv6
+{
+    #network settings
+    Write-host "Processing..Network settings IPv6."-ForegroundColor green
+    $netwrkv6 = [char]0x2551 + "    IPv6 Network settings.                                                  " + [char]0x2551
+    $netwrk1v6 = "IPv6 is Disabled. (Expected)"
+    if (Get-NetAdapterBinding |where {$_.DisplayName -match "IPv6" -and $_.enabled -eq 'true'} ){$netwrk1v6=  'IPv6 Enabled  please disable'}
+    
+    $blank | Out-file  C:\temp\$servername.txt -append
+    $linetop | Out-file  C:\temp\$servername.txt -append
+    $netwrkv6 | Out-file  C:\temp\$servername.txt -Append
+    $linebottom | Out-file  C:\temp\$servername.txt -append
+    $netwrk1v6 | Out-file  C:\temp\$servername.txt -Append
+}
+
 
 function networksettings
 {
@@ -320,16 +336,21 @@ function descript
     #server Description
     $pcdesc = Get-WmiObject Win32_operatingSystem 
     $desc = [char]0x2551 + "    Server Description                                                      " + [char]0x2551
-    $desc1 = "Local Description: $($pcdesc.description.tostring())"
-    $desc1 += "`n   AD Description: $(get-adcomputer $servername -Properties  Description |select -ExpandProperty Description)"
+ #getting INFO and Outputting it.
+    $LocalDesc= $($pcdesc.description.tostring())
+    $ADDESC = $(get-adcomputer $servername -Properties  Description |select -ExpandProperty Description).tostring()
+     
+      $propDesc = [PSCustomObject]@{
+           "Local Description"               = $LocalDesc
+           "AD Description"                  = $ADDESC
+                }
 
 
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
     $desc | Out-file  C:\temp\$servername.txt -Append
     $linebottom | Out-file  C:\temp\$servername.txt -append
-    $desc1 | Out-file  C:\temp\$servername.txt -Append
-
+    $propDesc |fl| Out-file  C:\temp\$servername.txt -Append
 
 }
 function IsActivated
@@ -867,7 +888,7 @@ Function VMwarecheck
 {
     Write-host "Processing..VMWare Tools" -ForegroundColor green
               
-    $VMTools = [char]0x2551 + "    Checking to see if VMware Tools are running                             " + [char]0x2551
+    $VMTools = [char]0x2551 + "    Checking to see if VMware / Nutanix Tools are running.                  " + [char]0x2551
 
     $VMTools1 = "This is a Physical Server."
     #write-host " This is a Physical Server." 
@@ -888,7 +909,7 @@ Function VMwarecheck
     {
         if (!(Get-Process | where name -like "*nutan*"))
         {
-            $VMTools1 = "VNutanix Tools are NOT running"
+            $VMTools1 = "Nutanix Tools are NOT running"
         }
         else 
         {
@@ -1170,6 +1191,7 @@ VMwarecheck
 memory
 pagefile
 networksettings
+networksettingsipv6
 NLBsettings
 Domain
 get-OU
