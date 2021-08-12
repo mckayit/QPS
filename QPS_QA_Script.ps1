@@ -1,41 +1,34 @@
 <# 
+.SYNOPSIS
   ********************************************************************************  
   *                                                                              *  
-  *  This script gets the info required to complete the INI Server QA report     *
+  *  This script gets the info required to complete the Server QA report         *
   *                                                                              *  
   ********************************************************************************    
 
-    Note:
-            Past in ISE and run   Gives all the info needed to complete the INI Server QA Sheet
+ #... <Short Description>
 
-
-    *******************
-    Copyright Notice.
-    *******************
-    This Program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+    Short description
+.DESCRIPTION
+      This script gets the info required to complete the Server QA report    
+      It uses a range of WMI as well as Powershell CMDLets and outputs all the results to c:\temp\<Servername>.txt
+      It also has a switch that allows you to send the Report to your email address by using the Following Switch -SendEmail at the end of the QPS_QA_Script.ps1 file.
+      Eg QPS-QA_Script -EendEmail
+      You will be prompted to enter the Email Address you want to send the report to.    Or at the end of the check you can amso enter Send-Report
+       and you will be prompted for your email address and a copy will be sent to you.
 .PARAMETER SendEmail
-    this is a Switch to send Email to email address prompted for when script run
+    This Prarameter is the switch used to prompt for the Email Address and send the Final report to.
+    
+
 .EXAMPLE
 # This will not send email with copy of QA Report.
     C:\PS>QPS_QA_Script   
 ## This will send email with copy of QA Report.
     C:\PS>QPS_QA_Script -sendemail
      
-    Example of how to use this cmdlet
+    
 
-
+.NOTES
     Author:
             Lawrence McKay
             Lawrence@mckayit.com
@@ -47,7 +40,7 @@
    ******* Update Version number below when a change is done.*******
 
     
-    History
+   History
             Version    Date               Name           Detail
             ------------------------------------------------------------------------------------
             1.0      20  Nov 2015     Lawrence       Initial Coding
@@ -111,6 +104,7 @@
             1.56     11  Aug   2021   Lawrence       Fixed up AD and Local Description Format issue
             1.57     11  Aug   2021   Lawrence       Added IPv6 Check to see if enabled. 
                                                      Added Check for BGInfo Reg Keys
+                                                     Fixed Clustering Output. 
                                                      Added Check for Performance settings.
                                                      Shows if Nutanix tools installed for a Nutanis System as well as VMWare tools
                                                      Fixed Title (Server name) display issue.
@@ -120,6 +114,7 @@
 
 
 #> 
+
 [CmdletBinding()]
 	param
 	(
@@ -1123,14 +1118,21 @@ Function get-OU
 
 Function Send-report
 {
-    $findusername = $env:username
+  <#  $findusername = $env:username
     $pattern = ’[^1234567890]’
     $emailusername = ($findusername –replace $pattern, ’’) -as [string]
     $emailusername
     $emailcreds = Get-Credential   -Message "Enter your PRDS standard user code. Do not enter Domain.  This is required to send email only."
     $global:emailcreds = $emailcreds
     $emailaddress1 = get-aduser $emailcreds.username -Properties *
-    #$Global:emailaddress = $emailaddress1.mail
+    $Global:emailaddress = $emailaddress1.mail
+    #>
+    
+  # prompt for Email Address
+        Add-Type -AssemblyName Microsoft.VisualBasic
+        $emailaddress=[Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Address to send Repot to.:','Enter Email Address')
+
+                
     Send-MailMessage -From "Server_QA-Reports@PRDS.QLDPOL" -Subject "QA Report for: $env:computername" -To $emailaddress -Body "QA Report for `n`n   Computername  $env:computername" -Attachments C:\temp\$servername.txt  -Port 25 -SmtpServer smtp.police.qld.gov.au
 
 
