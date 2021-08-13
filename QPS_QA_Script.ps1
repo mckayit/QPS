@@ -109,6 +109,8 @@
                                                      Shows if Nutanix tools installed for a Nutanis System as well as VMWare tools
                                                      Fixed Title (Server name) display issue.
                                                      Added Commandline switch to auto prompt for Creds and send email
+            1.58     11  Aug   2021   Lawrence       Now checking Performance settings in the .Default Reg key where it is now set.
+
 
 
 
@@ -129,7 +131,7 @@ $emailaddress=[Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Ad
 
                 }
 
-$Global:ver = "1.57"
+$Global:ver = "1.58"
 
 
 
@@ -1127,7 +1129,7 @@ Function Send-report
     $emailaddress1 = get-aduser $emailcreds.username -Properties *
     $Global:emailaddress = $emailaddress1.mail
     #>
-    
+
   # prompt for Email Address
         Add-Type -AssemblyName Microsoft.VisualBasic
         $emailaddress=[Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Address to send Repot to.:','Enter Email Address')
@@ -1148,7 +1150,9 @@ Function get-Performance
     Write-host "Processing..getting Performance settings." -ForegroundColor Green
  
     #getting the Info for the server. 
-    $perf = Get-ItemProperty -path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects 
+    # user based  $perf = Get-ItemProperty -path HKU:\.default\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects 
+    #Checks the .Default settings.
+    $perf = Get-ItemProperty -path registry::HKEY_USERS\.default\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects
     $Perfsettings = 'Not set correctly"'             
     if ( $perf.VisualFXSetting -eq '2')
     {
