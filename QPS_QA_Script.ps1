@@ -123,6 +123,9 @@
                                                      Added Commandline switch to auto prompt for Creds and send email
             1.58     11  Aug   2021   Lawrence       Now checking Performance settings in the .Default Reg key where it is now set.
             1.59     16  Aug   2012   Lawrence       Added the DontDisplayReport Switch as per Gary Chow Request.
+                                                     Removed some Char's that Ansiable can not deal with when it copies a file.
+                                                     It was rewriting them as something else.   EG BUG in Ansiable (’’, ’ and  – )
+                                            **Note** this may comeback as it depends on the Editor used.
 
 
 
