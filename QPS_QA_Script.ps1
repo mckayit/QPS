@@ -20,12 +20,24 @@
     This Prarameter is the switch used to prompt for the Email Address and send the Final report to.
     
 
+.PARAMETER DontDisplayReport
+    This Switch disables the Displaying of the Final Report in Notepad.
+
+
 .EXAMPLE
 # This will not send email with copy of QA Report.
     C:\PS>QPS_QA_Script   
 ## This will send email with copy of QA Report.
     C:\PS>QPS_QA_Script -sendemail
-     
+
+## This will disable notpad displaying the QA Report.
+    C:\PS>QPS_QA_Script -DontDisplayReport
+
+
+## This will disable notpad displaying the QA Report and Email the Report.
+    C:\PS>QPS_QA_Script -DontDisplayReport -sendemail
+
+         
     
 
 .NOTES
@@ -110,6 +122,7 @@
                                                      Fixed Title (Server name) display issue.
                                                      Added Commandline switch to auto prompt for Creds and send email
             1.58     11  Aug   2021   Lawrence       Now checking Performance settings in the .Default Reg key where it is now set.
+            1.59     16  Aug   2012   Lawrence       Added the DontDisplayReport Switch as per Gary Chow Request.
 
 
 
@@ -118,20 +131,22 @@
 #> 
 
 [CmdletBinding()]
-	param
-	(
-		[Switch]$Sendemail
-	)
+param
+(
+    [Switch]$Sendemail,
+    [Switch]$DontDisplayReport,
+        
+)
 	
 
 if ($Sendemail) # Sendemail switch used
-				{
-                 Add-Type -AssemblyName Microsoft.VisualBasic
-$emailaddress=[Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Address to send Repot to.:','Enter Email Address')
+{
+    Add-Type -AssemblyName Microsoft.VisualBasic
+    $emailaddress = [Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Address to send Repot to.:', 'Enter Email Address')
 
-                }
+}
 
-$Global:ver = "1.58"
+$Global:ver = "1.59"
 
 
 
@@ -154,8 +169,9 @@ Function Scriptver
     Write-host  "`n`n       Script Version is $ScriptVersion `n`n`n" -ForegroundColor Yellow
 }
 
-function cpu{
-<#
+function cpu
+{
+    <#
  #... gets the CPU info on current system
 .SYNOPSIS
    gets the CPU info on current system
@@ -246,7 +262,7 @@ function memory
     # Display memory 
     Write-host "Processing..Memory settings."-ForegroundColor green
     # get info from get-computerinfo
-    $mem1 =  ([math]::Round(($global:CPUINfO_.CsTotalPhysicalMemory /1GB),2))
+    $mem1 = ([math]::Round(($global:CPUINfO_.CsTotalPhysicalMemory / 1GB), 2))
     $memory1 = [char]0x2551 + "    Server RAM in GB                                                        " + [char]0x2551
     $memory2 = "This system has $mem1 GB RAM " 
 
@@ -289,8 +305,9 @@ function networksettingsipv6
     $netwrkv6 = [char]0x2551 + "    IPv6 Network settings.                                                  " + [char]0x2551
     $netwrk1v6 = "IPv6 is Disabled. (Expected)"
     #if IPv6 exists 
-    if (Get-NetAdapterBinding |where {$_.DisplayName -match "IPv6" -and $_.enabled -eq 'true'} ){
-        $netwrk1v6=  'IPv6 Enabled  ---> *** Please Disable ***'
+    if (Get-NetAdapterBinding | where { $_.DisplayName -match "IPv6" -and $_.enabled -eq 'true' } )
+    {
+        $netwrk1v6 = 'IPv6 Enabled  ---> *** Please Disable ***'
     }
     
     $blank | Out-file  C:\temp\$servername.txt -append
@@ -364,21 +381,21 @@ function descript
     #server Description
     $pcdesc = Get-WmiObject Win32_operatingSystem 
     $desc = [char]0x2551 + "    Server Description                                                      " + [char]0x2551
- #getting INFO and Outputting it.
-    $LocalDesc= $($pcdesc.description.tostring())
-    $ADDESC = $(get-adcomputer $servername -Properties  Description |select -ExpandProperty Description).tostring()
+    #getting INFO and Outputting it.
+    $LocalDesc = $($pcdesc.description.tostring())
+    $ADDESC = $(get-adcomputer $servername -Properties  Description | select -ExpandProperty Description).tostring()
      
-      $propDesc = [PSCustomObject]@{
-           "Local Description"               = $LocalDesc
-           "AD Description"                  = $ADDESC
-                }
+    $propDesc = [PSCustomObject]@{
+        "Local Description" = $LocalDesc
+        "AD Description"    = $ADDESC
+    }
 
 
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
     $desc | Out-file  C:\temp\$servername.txt -Append
     $linebottom | Out-file  C:\temp\$servername.txt -append
-    $propDesc |fl| Out-file  C:\temp\$servername.txt -Append
+    $propDesc | fl | Out-file  C:\temp\$servername.txt -Append
 
 }
 function IsActivated
@@ -907,8 +924,8 @@ function cleareventlogs
 {
     write-host  "`n Clearing all Eventlogs." -ForegroundColor green
     Get-WinEvent -ListLog * -Force | % { Wevtutil.exe cl $_.logname }
-    New-EventLog –LogName Application –Source “INI Build”  2>&1 | Out-Null
-    Write-EventLog –LogName Application –Source “INI Build” –EntryType Information –EventID 1  –Message “Log Event log cleaned by  :$env:username”
+    New-EventLog -LogName Application -Source "INI Build"  2>&1 | Out-Null
+    Write-EventLog -LogName Application -Source "INI Build" -EntryType Information -EventID 1  -Message "Log Event log cleaned by  :$env:username"
 
 }
 
@@ -1120,9 +1137,9 @@ Function get-OU
 
 Function Send-report
 {
-  <#  $findusername = $env:username
+    <#  $findusername = $env:username
     $pattern = ’[^1234567890]’
-    $emailusername = ($findusername –replace $pattern, ’’) -as [string]
+    $emailusername = ($findusername -replace $pattern, ’’) -as [string]
     $emailusername
     $emailcreds = Get-Credential   -Message "Enter your PRDS standard user code. Do not enter Domain.  This is required to send email only."
     $global:emailcreds = $emailcreds
@@ -1130,9 +1147,9 @@ Function Send-report
     $Global:emailaddress = $emailaddress1.mail
     #>
 
-  # prompt for Email Address
-        Add-Type -AssemblyName Microsoft.VisualBasic
-        $emailaddress=[Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Address to send Repot to.:','Enter Email Address')
+    # prompt for Email Address
+    Add-Type -AssemblyName Microsoft.VisualBasic
+    $emailaddress = [Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Address to send Repot to.:', 'Enter Email Address')
 
                 
     Send-MailMessage -From "Server_QA-Reports@PRDS.QLDPOL" -Subject "QA Report for: $env:computername" -To $emailaddress -Body "QA Report for `n`n   Computername  $env:computername" -Attachments C:\temp\$servername.txt  -Port 25 -SmtpServer smtp.police.qld.gov.au
@@ -1254,6 +1271,12 @@ sharesinfo
 TrustedForDelegation
 Uptime
 
+
+if !($DontDisplayReport) #dont sent report switch no used
+{
+    #Display the Report in Notepad.
+    notepad C:\temp\$servername.txt
+}
 #Display the Report in Notepad.
 notepad C:\temp\$servername.txt
 #Showing on screen where file Report is located.
@@ -1263,9 +1286,9 @@ Write-host "`n`n$env:computername.txt file is located in c:\temp" -BackgroundCol
 #Comment this out as well as the line above if you do not want to email the report to you.
 Write-host ="`n`n To send this report to yourself enter 'send-report' " -BackgroundColor green -ForegroundColor Red 
 if ($Sendemail) # Sendemail switch used
-				{
-                    Send-report 
-                }
+{
+    Send-report 
+}
 #cleaning up the Powershell RSAT module.
 Write-host "Removing Powershell AD Tools.  As installed at start of Script." -ForegroundColor Cyan
 if ($rsat_ad -notmatch 'installed')
