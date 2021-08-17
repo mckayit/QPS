@@ -137,7 +137,7 @@
 param
 (
     [Switch]$Sendemail,
-    [Switch]$DontDisplayReport,
+    [Switch]$DontDisplayReport
         
 )
 	
@@ -1275,7 +1275,7 @@ TrustedForDelegation
 Uptime
 
 
-if !($DontDisplayReport) #dont sent report switch no used
+if (!($DontDisplayReport)) #dont sent report switch no used
 {
     #Display the Report in Notepad.
     notepad C:\temp\$servername.txt
