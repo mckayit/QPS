@@ -53,16 +53,16 @@ function Get-OS_from_VMWareDumpIPADDRESS
             HelpMessage = 'Enter The path to Nutanix export file')]
         $VMWarefile,
         [Parameter(Mandatory = $false)]
-        $PRDSCREDS = (get-credential -Message "Enter your PRDS Admin Creds"  )  ,
+        $PRDSCREDS = (get-credential -Message "Enter your PRDS Admin Creds" -UserName prds\904223a  )  ,
 
         [Parameter(Mandatory = $false)]
-        $desqldcreds = (get-credential -Message "Enter your DESQLD Admin Creds" ),
+        $desqldcreds = (get-credential -Message "Enter your DESQLD Admin Creds" -UserName desqld\lmckay_admin ),
 
         [Parameter(Mandatory = $false)]
-        $acdscreds = (get-credential -Message "Enter your ACDS Admin Creds" ),
+        $acdscreds = (get-credential -Message "Enter your ACDS Admin Creds" -UserName acds\904223a),
 
         [Parameter(Mandatory = $false)]
-        $dvdscreds = (get-credential -Message "Enter your DVDS Admin Creds" )
+        $dvdscreds = (get-credential -Message "Enter your DVDS Admin Creds" -UserName DVDS\904223a)
      
     )
     
@@ -72,14 +72,14 @@ function Get-OS_from_VMWareDumpIPADDRESS
         Write-host "Please wait while I get the following Information. `nThis may take a few Min." -ForegroundColor cyan
 
         write-host '   Getting Servers from DESQLD' -ForegroundColor green
-        $DESQLD = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' -server desqld.internal  -Credential $desqldcreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged
+        $DESQLD = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' -server desqld.internal  -Credential $desqldcreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged | select CanonicalName, DistinguishedName, DNSHostName, Enabled, IPv4Address, Name, OperatingSystem, OperatingSystemServicePack, OperatingSystemVersion, whenchanged
         write-host "found " $desqld.count
         write-host '   Getting Servers from DVDS' -ForegroundColor green
-        $DVDS = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' -Server dvds.devpol -Credential $dvdscreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged
+        $DVDS = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' -Server dvds.devpol -Credential $dvdscreds -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged | select CanonicalName, DistinguishedName, DNSHostName, Enabled, IPv4Address, Name, OperatingSystem, OperatingSystemServicePack, OperatingSystemVersion, whenchanged
         write-host "found " $dvds.count
 
         write-host '   Getting Servers from ACDS' -ForegroundColor green
-        $acds = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' -Server edwqpsaddcac01.acds.accpol  -Credential $acdscreds  -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged
+        $acds = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' -Server edwqpsaddcac01.acds.accpol  -Credential $acdscreds  -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged | select CanonicalName, DistinguishedName, DNSHostName, Enabled, IPv4Address, Name, OperatingSystem, OperatingSystemServicePack, OperatingSystemVersion, whenchanged
         write-host "found " $acds.count
 
         write-host '   Getting Server Names from PRDS' -ForegroundColor green
@@ -99,7 +99,7 @@ function Get-OS_from_VMWareDumpIPADDRESS
             Write-Progress @paramWriteProgress
                         
             $i++
-            Get-ADComputer -Identity $name -server prds.qldpol -Credential $PRDSCREDS -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged
+            Get-ADComputer -Identity $name -server prds.qldpol -Credential $PRDSCREDS -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged | select CanonicalName, DistinguishedName, DNSHostName, Enabled, IPv4Address, Name, OperatingSystem, OperatingSystemServicePack, OperatingSystemVersion, whenchanged
         }
         write-host "found prds B " $prds.count
         #        $prds = Get-ADComputer -ResultPageSize 999999 -Filter 'operatingsystem -like "*server*" ' -server prds.qldpol -Credential $PRDSCREDS -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged
