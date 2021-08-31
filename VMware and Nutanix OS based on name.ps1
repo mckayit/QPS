@@ -62,7 +62,12 @@ function Get-OS_from_VMWareDumpIPADDRESS
         $acdscreds = (get-credential -Message "Enter your ACDS Admin Creds" -UserName acds\904223a),
 
         [Parameter(Mandatory = $false)]
-        $dvdscreds = (get-credential -Message "Enter your DVDS Admin Creds" -UserName DVDS\904223a)
+        $dvdscreds = (get-credential -Message "Enter your DVDS Admin Creds" -UserName DVDS\904223a),
+
+        [Parameter(Mandatory = $false)]
+        $PSBAcreds = (get-credential -Message "Enter your DVDS Admin Creds" -UserName psba\904223a),
+
+        
      
     )
     
@@ -90,6 +95,8 @@ function Get-OS_from_VMWareDumpIPADDRESS
         {
      
             $paramWriteProgress = @{
+
+                
                 Activity        = 'Getting PRDs info'
                 Status          = "Processing [$i] of [$($names.Count)] Servers"
                 PercentComplete = (($i / $names.Count) * 100)
