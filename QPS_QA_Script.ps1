@@ -129,6 +129,7 @@
             1.60     06 Sept   2021   Lawrence       Fixed Nutanix detection                                   
             1.61     06 Sept   2021   Lawrence       Fixed issue with Time Sync         
             1.62     06 Sept   2021   Lawrence       fixed how disks are shown  now shows Mount point Disks if they exist.                        
+            1.63     06 Sept   2021   Lawrence       fixed Network to show Mask
 
 
 
@@ -152,7 +153,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.62"     
+$Global:ver = "1.63"     
 
 
 
@@ -329,14 +330,50 @@ function networksettings
     #network settings
     Write-host "Processing..Network settings."-ForegroundColor green
     $netwrk = [char]0x2551 + "    Network settings.                                                       " + [char]0x2551
-    $netwrk1 = Get-NetIPConfiguration -WarningAction SilentlyContinue -ErrorAction SilentlyContinue | Out-String
+    $netwrk1a = Get-NetIPConfiguration  -WarningAction SilentlyContinue -ErrorAction SilentlyContinue 
+    $nt = Get-NetIPAddress -InterfaceAlias $(($netwrk1a).InterfaceAlias)
+    $netwrk1 = $netwrk1a | out-string | foreach-object { $_.trim() }
+    switch ($nt.PrefixLength)
+    {
+        32 { $MASK = "SubNet Mask          : 255.255.255.255 or /32" }
+        31 { $MASK = "SubNet Mask          : 255.255.255.254 or /31" }
+        30 { $MASK = "SubNet Mask          : 255.255.255.252 or /30" }
+        29 { $MASK = "SubNet Mask          : 255.255.255.248 or /29" }
+        28 { $MASK = "SubNet Mask          : 255.255.255.240 or /28" }
+        27 { $MASK = "SubNet Mask          : 255.255.255.224 or /27" }
+        26 { $MASK = "SubNet Mask          : 255.255.255.192 or /26" }
+        25 { $MASK = "SubNet Mask          : 255.255.255.128 or /25" }
+        24 { $MASK = "SubNet Mask          : 255.255.255.0 or /24" }
+        23 { $MASK = "SubNet Mask          : 255.255.254.0 or /23" }
+        22 { $MASK = "SubNet Mask          : 255.255.252.0 or /22" }
+        21 { $MASK = "SubNet Mask          : 255.255.248.0 or /21" }
+        20 { $MASK = "SubNet Mask          : 255.255.240.0 or /20" }
+        19 { $MASK = "SubNet Mask          : 255.255.224.0 or /19" }
+        18 { $MASK = "SubNet Mask          : 255.255.192.0 or /18" }
+        17 { $MASK = "SubNet Mask          : 255.255.128.0 or /17" }
+        16 { $MASK = "SubNet Mask          : 255.255.0.0 or /16" }
+        15 { $MASK = "SubNet Mask          : 255.254.0.0 or /15" }
+        14 { $MASK = "SubNet Mask          : 255.252.0.0 or /14" }
+        13 { $MASK = "SubNet Mask          : 255.228.0.0 or /13" }
+        12 { $MASK = "SubNet Mask          : 255.240.0.0 or /12" }
+        11 { $MASK = "SubNet Mask          : 255.224.0.0 or /11" }
+        10 { $MASK = "SubNet Mask          : 255.192.0.0 or /9" }
+        9 { $MASK = "SubNet Mask          : 255.128.0.0 or /8" }
+        8 { $MASK = "SubNet Mask          : 255.0.0.0 or /7" }
+        7 { $MASK = "SubNet Mask          : 254.0.0.0 or /6" }
+        6 { $MASK = "SubNet Mask          : 252.0.0.0 or /5" }
+        5 { $MASK = "SubNet Mask          : 248.0.0.0 or /4" }
+        4 { $MASK = "SubNet Mask          : 240.0.0.0 or /3" }
+        3 { $MASK = "SubNet Mask          : 224.0.0.0 or /3" }
+        2 { $MASK = "SubNet Mask          : 192.0.0.0 or /2" }
 
+    }
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
     $netwrk | Out-file  C:\temp\$servername.txt -Append
     $linebottom | Out-file  C:\temp\$servername.txt -append
     $netwrk1 | Out-file  C:\temp\$servername.txt -Append
-
+    $mask  | Out-file  C:\temp\$servername.txt -Append
     #network Teaming 
     if (Get-NetLbfoTeam | where name -ne "")
     {
@@ -876,7 +913,7 @@ function tasksched
 
 function Eventlogsettingscheck
 {
-    Write-host "Checking EventLog Settings" -ForegroundColor green
+    Write-host "Processing..EventLog Settings" -ForegroundColor green
                  
     $evlsc = [char]0x2551 + "    Event Log Config Check                                                  " + [char]0x2551 
     $Result = Get-Eventlog -list | `
@@ -923,7 +960,7 @@ function CheckNTP
     $ntp1 = "-------------------------------------------------------------------------------------------------------"
     $ntp2 = " $ntpserver    $Type    $PDC   $localtime   $timezone "
     $timedif = New-TimeSpan -End $localtime -Start $dt_str
-    if ($timedif -gt "0")
+    if ($timedif -gt "2")
     {
         $ntp3 = "Time is not sync'ed "
         $ntp4 = "    Local time is: $localtime     Remote time is: $dt_str"
@@ -1335,7 +1372,7 @@ if (!($DontDisplayReport)) #dont sent report switch no used
     notepad C:\temp\$servername.txt
 }
 #Display the Report in Notepad.
-notepad C:\temp\$servername.txt
+#notepad C:\temp\$servername.txt
 #Showing on screen where file Report is located.
 Write-host "`n`n$env:computername.txt file is located in c:\temp" -BackgroundColor Yellow -ForegroundColor Red 
 
