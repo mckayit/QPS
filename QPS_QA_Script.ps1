@@ -150,7 +150,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.60" 
+$Global:ver = "1.60"     
 
 
 
