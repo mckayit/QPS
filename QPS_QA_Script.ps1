@@ -128,7 +128,7 @@
                                             **Note** this may comeback as it depends on the Editor used.
             1.60     06 Sept   2021   Lawrence       Fixed Nutanix detection                                   
             1.61     06 Sept   2021   Lawrence       Fixed issue with Time Sync         
-            1.62                             
+            1.62     06 Sept   2021   Lawrence       fixed how disks are shown  now shows Mount point Disks if they exist.                        
 
 
 
@@ -152,7 +152,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.61"     
+$Global:ver = "1.62"     
 
 
 
