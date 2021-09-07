@@ -127,6 +127,8 @@
                                                      It was rewriting them as something else.   EG BUG in Ansiable (’’, ’ and  – )
                                             **Note** this may comeback as it depends on the Editor used.
             1.60     06 Sept   2021   Lawrence       Fixed Nutanix detection                                   
+            1.61     06 Sept   2021   Lawrence       Fixed issue with Time Sync         
+            1.62                             
 
 
 
@@ -150,7 +152,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.60"     
+$Global:ver = "1.61"     
 
 
 
@@ -514,32 +516,18 @@ Function adminpassword
     $adminpwd1 | Out-file  C:\temp\$servername.txt -Append  
 }
 
-function Windozupdates
-{
-    Write-host "Processing..Windozs Update settings."-ForegroundColor green
-    #Number of windows updates
-              
-    $winhotfix = [char]0x2551 + "    Number of windows updates should be Approx 8 for 2019                   " + [char]0x2551
-    $winhotfix1 = (Get-HotFix).count# | measure | fl Count | Out-String
-
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $winhotfix | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    Write-output "$winhotfix1 updates Installed" | Out-file  C:\temp\$servername.txt -Append  
-
-}
 
 FUNCTION DRIVES
 {
     Write-host "Processing..Checking size of Disks settings."-ForegroundColor green
           
     $drvs = [char]0x2551 + "    Checking size of Disks                                                  " + [char]0x2551 
-    $drvs1 = get-wmiobject win32_volume | where { $_.driveletter -ne 'X:' -and $_.label -ne 'System Reserved' } | sort driveletter | Ft -AutoSize  Driveletter, label, 
+    $drvs1 = Get-Volume | sort DriveLetter
+    <# $drvs1 = get-wmiobject win32_volume | where { $_.driveletter -ne 'X:' -and $_.label -ne 'System Reserved' } | sort driveletter | Ft -AutoSize  Driveletter, label, 
     @{name = "  Disk Size(GB) "; Expression = { "{0,8:N0}" -f ($_.Capacity / 1gb) } } ,
     @{name = "  Free Disk Size(GB) "; Expression = { "{0,8:N0}" -f ($_.FreeSpace / 1gb) } } ,
     @{name = "  Block Size (KB) "; Expression = { "{0,8:N0}" -f ($_.Blocksize / 1kb) } } 
-
+#>
     $blank | Out-file  C:\temp\$servername.txt -append
     $linetop | Out-file  C:\temp\$servername.txt -append
     $drvs | Out-file  C:\temp\$servername.txt -Append
@@ -598,6 +586,70 @@ function bginfo
     $bgin | Out-file  C:\temp\$servername.txt -Append 
 
 }
+
+function Windozupdates
+{
+    Write-host "Processing..Windozs Update settings."-ForegroundColor green
+    #Number of windows updates
+              
+    $winhotfix = [char]0x2551 + "    Number of windows updates should be Approx 8 for 2019                   " + [char]0x2551
+    $winhotfix1 = (Get-HotFix)# | measure | fl Count | Out-String
+
+    $blank | Out-file  C:\temp\$servername.txt -append
+    $linetop | Out-file  C:\temp\$servername.txt -append
+    $winhotfix | Out-file  C:\temp\$servername.txt -Append
+    $linebottom | Out-file  C:\temp\$servername.txt -append
+    Write-output "$(($winhotfix1).count) updates Installed"  | Out-file  C:\temp\$servername.txt -Append  
+    $winhotfix1 | select "HotfixID", "InstalledON"  | Out-file  C:\temp\$servername.txt -Append 
+
+}
+function WindowsUpdatesSettings
+{
+     
+    $NotificationLevels = @{ 0 = "0 - Not configured"; 1 = "1 - Disabled"; 2 = "2 - Notify before download"; 3 = "3 - Notify before installation"; 4 = "4 - Scheduled installation"; 5 = "5 - Users configure" }
+    $ScheduledInstallationDays = @{ 0 = "0 - Every Day"; 1 = "1 - Every Sunday"; 2 = "2 - Every Monday"; 3 = "3 - Every Tuesday"; 4 = "4 - Every Wednesday"; 5 = "5 - Every Thursday"; 6 = "6 - Every Friday"; 7 = "7 - EverySaturday" }
+    $RegistryKey = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey([Microsoft.Win32.RegistryHive]"LocalMachine", $servername) 
+    $RegistrySubKey1 = $RegistryKey.OpenSubKey("SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\") 
+    $RegistrySubKey2 = $RegistryKey.OpenSubKey("SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\")                
+       
+    #Titlebox -SubjectTitle "Windows Update"
+    
+    $Result = New-Object -TypeName PSObject
+    Try
+    {
+        Foreach ($RegName in $RegistrySubKey1.GetValueNames())
+        { 
+            $Value = $RegistrySubKey1.GetValue($RegName) 
+            $Result | Add-Member -MemberType NoteProperty -Name $RegName -Value $Value
+        }
+        Foreach ($RegName in $RegistrySubKey2.GetValueNames())
+        { 
+            $Value = $RegistrySubKey2.GetValue($RegName) 
+            Switch ($RegName)
+            {
+                "AUOptions" { $Value = $NotificationLevels[$Value] }
+                "ScheduledInstallDay" { $Value = $ScheduledInstallationDays[$Value] }
+            }
+            $Result | Add-Member -MemberType NoteProperty -Name $RegName -Value $Value
+        }
+    }
+    Catch
+    {
+        Write-Error "Could not find registry subkey: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate. Probably you are not using Group Policy for Windows Update settings." -ErrorAction Stop
+    }
+
+
+    $winhotfixtitle = [char]0x2551 + "    Windows Update Settings.                                                " + [char]0x2551 
+    $blank | Out-file  C:\temp\$servername.txt -append
+    $linetop | Out-file  C:\temp\$servername.txt -append
+    $winhotfixtitle | Out-file  C:\temp\$servername.txt -Append
+    $linebottom | Out-file  C:\temp\$servername.txt -append
+    
+    
+    $result | Out-file  C:\temp\$servername.txt -Append
+                         
+}
+
 
 function security
 {
@@ -1264,6 +1316,7 @@ Drives
 adminpassword
 Services-check
 Windozupdates
+WindowsUpdatesSettings
 functionsinstalled
 tasksched
 CheckNTP
