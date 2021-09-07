@@ -126,6 +126,7 @@
                                                      Removed some Char's that Ansiable can not deal with when it copies a file.
                                                      It was rewriting them as something else.   EG BUG in Ansiable (’’, ’ and  – )
                                             **Note** this may comeback as it depends on the Editor used.
+            1.60     06 Sept   2021   Lawrence       Fixed Nutanix detection                                   
 
 
 
@@ -149,7 +150,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.59"
+$Global:ver = "1.60" 
 
 
 
@@ -955,7 +956,7 @@ Function VMwarecheck
     
     if ($global:CPUINfO_.CsManufacturer -like '*nutan*')
     {
-        if (!(Get-Process | where name -like "*nutan*"))
+        if (!(get-service | where name -like "Nutanix Guest*"))
         {
             $VMTools1 = "Nutanix Tools are NOT running"
         }
