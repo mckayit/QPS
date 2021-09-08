@@ -131,7 +131,8 @@
             1.62     06 Sept   2021   Lawrence       fixed how disks are shown  now shows Mount point Disks if they exist.                        
             1.63     06 Sept   2021   Lawrence       fixed Network to show Mask
             1.64     08 Sept   2021   Lawrence       Added Networker check
-            1.65     09 Sept   2021   Lawrence       Added Check for In Workspace is disabled            
+            1.65     09 Sept   2021   Lawrence       Added Check for In Workspace is disabled
+                                                     Output file now has date_time in the name so you can see when it was run ans see multi reports as you work.            
 
 
 
@@ -256,11 +257,11 @@ function cpu
         #output
         $cpu = [char]0x2551 + "    CPU info.                                                               " + [char]0x2551
 
-        $blank | Out-file  C:\temp\$servername.txt -append
-        $linetop | Out-file  C:\temp\$servername.txt -append
-        $cpu  | Out-file  C:\temp\$servername.txt -append
-        $linebottom | Out-file  C:\temp\$servername.txt -append
-        [PScustomobject]$prop | Out-file  C:\temp\$servername.txt -Append
+        $blank | Out-file  $reportfile -append
+        $linetop | Out-file  $reportfile -append
+        $cpu  | Out-file  $reportfile -append
+        $linebottom | Out-file  $reportfile -append
+        [PScustomobject]$prop | Out-file  $reportfile -Append
             
     }
     
@@ -275,11 +276,11 @@ function memory
     $memory1 = [char]0x2551 + "    Server RAM in GB                                                        " + [char]0x2551
     $memory2 = "This system has $mem1 GB RAM " 
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $Memory1 | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $Memory2 | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $Memory1 | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $Memory2 | Out-file  $reportfile -Append
 
 
 }
@@ -298,13 +299,13 @@ function pagefile
     $PGSize3 = (gwmi Win32_ComputerSystem).AutomaticManagedPagefile
     $PGSize2 = $PGSize2 + $PGSize3
     $PGSize3a = " "#      NOTE: It should be false"
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $PGSize | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $PGSize1 | Out-file  C:\temp\$servername.txt -Append
-    $PGSize2 | Out-file  C:\temp\$servername.txt -Append
-    $PGSize3a | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $PGSize | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $PGSize1 | Out-file  $reportfile -Append
+    $PGSize2 | Out-file  $reportfile -Append
+    $PGSize3a | Out-file  $reportfile -Append
 }
 
 function networksettingsipv6
@@ -319,11 +320,11 @@ function networksettingsipv6
         $netwrk1v6 = 'IPv6 Enabled  ---> *** Please Disable ***'
     }
     
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $netwrkv6 | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $netwrk1v6 | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $netwrkv6 | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $netwrk1v6 | Out-file  $reportfile -Append
 }
 
 
@@ -370,12 +371,12 @@ function networksettings
         2 { $MASK = "SubNet Mask          : 192.0.0.0 or /2" }
 
     }
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $netwrk | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $netwrk1 | Out-file  C:\temp\$servername.txt -Append
-    $mask  | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $netwrk | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $netwrk1 | Out-file  $reportfile -Append
+    $mask  | Out-file  $reportfile -Append
     #network Teaming 
     if (Get-NetLbfoTeam | where name -ne "")
     {
@@ -392,11 +393,11 @@ function networksettings
         $nicteaming3 = "Network Adapters in the Team:`n$teamstatus"
     
 
-        $linetop | Out-file  C:\temp\$servername.txt -append
-        $NicTeaming1 | Out-file  C:\temp\$servername.txt -append
-        $linebottom | Out-file  C:\temp\$servername.txt -append
-        $Nicteaming2 | Out-file  C:\temp\$servername.txt -append
-        $nicteaming3 | Out-file  C:\temp\$servername.txt -append
+        $linetop | Out-file  $reportfile -append
+        $NicTeaming1 | Out-file  $reportfile -append
+        $linebottom | Out-file  $reportfile -append
+        $Nicteaming2 | Out-file  $reportfile -append
+        $nicteaming3 | Out-file  $reportfile -append
     }
     else {}
 
@@ -412,11 +413,11 @@ function domain
     $CSDomain = $global:CPUINfO_.CsDomain.tostring()
     $dom1 = "    " + $env:USERDNSDOMAIN + "            " + $global:CPUINfO_.CsDomain.tostring()
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $dom | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $dom1 | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $dom | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $dom1 | Out-file  $reportfile -Append
 
 }
 
@@ -436,11 +437,11 @@ function descript
     }
 
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $desc | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $propDesc | fl | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $desc | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $propDesc | fl | Out-file  $reportfile -Append
 
 }
 function IsActivated
@@ -452,11 +453,11 @@ function IsActivated
 
 
     $OUTitle = [char]0x2551 + "    Server Activation Status                                                " + [char]0x2551
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $oUTitle | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $ActivationStatus | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $oUTitle | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $ActivationStatus | Out-file  $reportfile -append
 
 }
 
@@ -483,27 +484,27 @@ function NLBsettings
             $clstnode4 = "Cluster Affinity mode is set to: $affinity"  
 
     
-            $blank | Out-file  C:\temp\$servername.txt -append
-            $linetop | Out-file  C:\temp\$servername.txt -append
-            $clst | Out-file  C:\temp\$servername.txt -Append
-            $linebottom | Out-file  C:\temp\$servername.txt -append
-            $clst1 | Out-file  C:\temp\$servername.txt -Append
-            $clstnode3 | Out-file  C:\temp\$servername.txt -Append
-            $clstnode | Out-file  C:\temp\$servername.txt -Append
-            $clstnode1 | Out-file  C:\temp\$servername.txt -Append
-            $clstnode3 | Out-file  C:\temp\$servername.txt -Append
-            $clstnode4 | Out-file  C:\temp\$servername.txt -Append
+            $blank | Out-file  $reportfile -append
+            $linetop | Out-file  $reportfile -append
+            $clst | Out-file  $reportfile -Append
+            $linebottom | Out-file  $reportfile -append
+            $clst1 | Out-file  $reportfile -Append
+            $clstnode3 | Out-file  $reportfile -Append
+            $clstnode | Out-file  $reportfile -Append
+            $clstnode1 | Out-file  $reportfile -Append
+            $clstnode3 | Out-file  $reportfile -Append
+            $clstnode4 | Out-file  $reportfile -Append
 
         }
         else
         {
             $clst = [char]0x2551 + "    Cluster Info                                                            " + [char]0x2551
             $CNotINSTALLED = "Network LoadBalanceing installed but not configured."   
-            $blank | Out-file  C:\temp\$servername.txt -append
-            $linetop | Out-file  C:\temp\$servername.txt -append
-            $clst | Out-file  C:\temp\$servername.txt -Append
-            $linebottom | Out-file  C:\temp\$servername.txt -append
-            $CNotINSTALLED | Out-file  C:\temp\$servername.txt -append
+            $blank | Out-file  $reportfile -append
+            $linetop | Out-file  $reportfile -append
+            $clst | Out-file  $reportfile -Append
+            $linebottom | Out-file  $reportfile -append
+            $CNotINSTALLED | Out-file  $reportfile -append
         }
 
     }
@@ -525,11 +526,11 @@ function filepermission
         $r = $root.root | Out-String
         $FilePerd = $FilePerd + (get-acl $root.root | fl | out-string)
     }
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $fileper | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $fileperd | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $fileper | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $fileperd | Out-file  $reportfile -Append
 }
 
 Function adminpassword
@@ -548,11 +549,11 @@ Function adminpassword
     #$adminpwd1
 
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $adminpwd | Out-file  C:\temp\$servername.txt -Append
-    $lineBottom | Out-file  C:\temp\$servername.txt -append
-    $adminpwd1 | Out-file  C:\temp\$servername.txt -Append  
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $adminpwd | Out-file  $reportfile -Append
+    $lineBottom | Out-file  $reportfile -append
+    $adminpwd1 | Out-file  $reportfile -Append  
 }
 
 function networker
@@ -604,13 +605,13 @@ print
 
     $anetworkert = [char]0x2551 + "    Networker Backup Status                                                 " + [char]0x2551
                  
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $anetworkert | Out-file  C:\temp\$servername.txt -Append
-    $lineBottom | Out-file  C:\temp\$servername.txt -append
-    $found11 | Out-file  C:\temp\$servername.txt -Append
-    $blank | Out-file  C:\temp\$servername.txt -append 
-    $found12 | Out-file  C:\temp\$servername.txt -Append 
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $anetworkert | Out-file  $reportfile -Append
+    $lineBottom | Out-file  $reportfile -append
+    $found11 | Out-file  $reportfile -Append
+    $blank | Out-file  $reportfile -append 
+    $found12 | Out-file  $reportfile -Append 
 }
 
 FUNCTION DRIVES
@@ -624,11 +625,11 @@ FUNCTION DRIVES
     @{name = "  Free Disk Size(GB) "; Expression = { "{0,8:N0}" -f ($_.FreeSpace / 1gb) } } ,
     @{name = "  Block Size (KB) "; Expression = { "{0,8:N0}" -f ($_.Blocksize / 1kb) } } 
 #>
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $drvs | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $drvs1 | Out-file  C:\temp\$servername.txt -Append 
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $drvs | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $drvs1 | Out-file  $reportfile -Append 
 }
 
 function functionsinstalled
@@ -659,11 +660,11 @@ function functionsinstalled
     $funt1 = $funta | out-string
     $funt1 = $funt1 + $funt1num
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $funt | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $funt1 | Out-file  C:\temp\$servername.txt -Append 
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $funt | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $funt1 | Out-file  $reportfile -Append 
 
 }
 
@@ -675,11 +676,11 @@ function bginfo
     $bgin = get-ItemProperty  -path HKLM:\SOFTWARE\BGinfo
     $bginf1 = $bgin.Build_date
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $bginf | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $bgin | Out-file  C:\temp\$servername.txt -Append 
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $bginf | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $bgin | Out-file  $reportfile -Append 
 
 }
 
@@ -691,12 +692,12 @@ function Windozupdates
     $winhotfix = [char]0x2551 + "    Number of windows updates should be Approx 8 for 2019                   " + [char]0x2551
     $winhotfix1 = (Get-HotFix)# | measure | fl Count | Out-String
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $winhotfix | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    Write-output "$(($global:CPUINfO_.OsHotFixes).count) updates Installed"  | Out-file  C:\temp\$servername.txt -Append  
-    $global:CPUINfO_.OsHotFixes  | Out-file  C:\temp\$servername.txt -Append 
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $winhotfix | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    Write-output "$(($global:CPUINfO_.OsHotFixes).count) updates Installed"  | Out-file  $reportfile -Append  
+    $global:CPUINfO_.OsHotFixes  | Out-file  $reportfile -Append 
 
 }
 function WindowsUpdatesSettings
@@ -736,13 +737,13 @@ function WindowsUpdatesSettings
 
 
     $winhotfixtitle = [char]0x2551 + "    Windows Update Settings.                                                " + [char]0x2551 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $winhotfixtitle | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $winhotfixtitle | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
     
     
-    $result | Out-file  C:\temp\$servername.txt -Append
+    $result | Out-file  $reportfile -Append
                          
 }
 
@@ -774,11 +775,11 @@ function security
     }
     #$sec1
  
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $sec | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $sec1 | Out-file  C:\temp\$servername.txt -Append 
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $sec | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $sec1 | Out-file  $reportfile -Append 
 }
 
 function openview
@@ -806,12 +807,12 @@ function openview
         $opview2 = "HP OpenView Ctrl  ****Service Missing****"
     }
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $opview | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $opview1 | Out-file  C:\temp\$servername.txt -Append   
-    $opview2 | Out-file  C:\temp\$servername.txt -Append     
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $opview | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $opview1 | Out-file  $reportfile -Append   
+    $opview2 | Out-file  $reportfile -Append     
 
 }
 
@@ -859,12 +860,12 @@ function softwwareinstalled
     $appsinst1 = $appsinst1 + (gc c:\temp\apps.txt | where { $_ -notlike " *" } | measure).count
 
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $appsinst | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $appsinst1 | Out-file  C:\temp\$servername.txt -Append   
-    $appsinst2 | Out-file  C:\temp\$servername.txt -Append     
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $appsinst | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $appsinst1 | Out-file  $reportfile -Append   
+    $appsinst2 | Out-file  $reportfile -Append     
 
 }
 
@@ -879,11 +880,11 @@ function Sharesinfo
         $sharenotexist = "No Shares Defined"  
            
         $smbshr = [char]0x2551 + "    File System Shares settings                                             " + [char]0x2551 
-        $blank | Out-file  C:\temp\$servername.txt -Append
-        $linetop | Out-file  C:\temp\$servername.txt -append
-        $smbshr | Out-file  C:\temp\$servername.txt -Append
-        $linebottom | Out-file  C:\temp\$servername.txt -append
-        $sharenotexist | Out-file  C:\temp\$servername.txt -append
+        $blank | Out-file  $reportfile -Append
+        $linetop | Out-file  $reportfile -append
+        $smbshr | Out-file  $reportfile -Append
+        $linebottom | Out-file  $reportfile -append
+        $sharenotexist | Out-file  $reportfile -append
     }
     else
     {
@@ -902,11 +903,11 @@ function Sharesinfo
         }
  
 
-        $blank | Out-file  C:\temp\$servername.txt -Append
-        $linetop | Out-file  C:\temp\$servername.txt -append
-        $smbshr | Out-file  C:\temp\$servername.txt -Append
-        $linebottom | Out-file  C:\temp\$servername.txt -append
-        $smbshraa | Out-file  C:\temp\$servername.txt -Append   
+        $blank | Out-file  $reportfile -Append
+        $linetop | Out-file  $reportfile -append
+        $smbshr | Out-file  $reportfile -Append
+        $linebottom | Out-file  $reportfile -append
+        $smbshraa | Out-file  $reportfile -Append   
     }
 
 }
@@ -925,11 +926,11 @@ function TrustedForDelegation
         $svrdel1 = "Computer Account TrustedForDelegation equals False `r`n This Computer Account is Not Trusted for Delegation   "
     }
  
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $svrdel | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $svrdel1 | Out-file  C:\temp\$servername.txt -Append   
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $svrdel | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $svrdel1 | Out-file  $reportfile -Append   
    
 }
 
@@ -962,11 +963,11 @@ function tasksched
                
     $tasksched3 = $tasksched2 + $SchedTasks
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $tasksched1 | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $tasksched3 | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $tasksched1 | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $tasksched3 | Out-file  $reportfile -append
 
 }
 
@@ -991,12 +992,12 @@ function Eventlogsettingscheck
         $evlsc1 = " "
     }
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $evlsc | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $evlsc1 | Out-file  C:\temp\$servername.txt -append
-    $evlsc2 | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $evlsc | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $evlsc1 | Out-file  $reportfile -append
+    $evlsc2 | Out-file  $reportfile -append
 
 
 }
@@ -1029,15 +1030,15 @@ function CheckNTP
         $ntp3 = " Time is Synced"
     }
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $ntptitle | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $ntp | Out-file  C:\temp\$servername.txt -Append
-    $ntp1 | Out-file  C:\temp\$servername.txt -Append   
-    $ntp2 | Out-file  C:\temp\$servername.txt -Append     
-    $ntp3 | Out-file  C:\temp\$servername.txt -Append     
-    $ntp4 | Out-file  C:\temp\$servername.txt -Append     
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $ntptitle | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $ntp | Out-file  $reportfile -Append
+    $ntp1 | Out-file  $reportfile -Append   
+    $ntp2 | Out-file  $reportfile -Append     
+    $ntp3 | Out-file  $reportfile -Append     
+    $ntp4 | Out-file  $reportfile -Append     
 
 }
 
@@ -1063,11 +1064,11 @@ function Eventlogerrors
         $evt1 = "No Errors Detected  "
     }
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $evt | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $evt1 | Out-file  C:\temp\$servername.txt -Append    
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $evt | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $evt1 | Out-file  $reportfile -Append    
 
 
 }
@@ -1117,11 +1118,11 @@ Function VMwarecheck
     
   
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $VMTools | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $VMTools1 | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $VMTools | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $VMTools1 | Out-file  $reportfile -Append
 
 
 }
@@ -1136,12 +1137,12 @@ function Services-check
     else 
     { $servicesrunning1 = 'There are No Services running as a user.' }
  
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $servicesrunning | Out-file  C:\temp\$servername.txt -Append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $servicesrunning1 | Out-file  C:\temp\$servername.txt -Append  
-    $blank | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $servicesrunning | Out-file  $reportfile -Append
+    $linebottom | Out-file  $reportfile -append
+    $servicesrunning1 | Out-file  $reportfile -Append  
+    $blank | Out-file  $reportfile -append
                 
 }
 
@@ -1161,11 +1162,11 @@ function iisdefaultlocal
                   
         $iisdef = [char]0x2551 + "    IIS Default log location                                                " + [char]0x2551
         $iisdef1 = get-webconfiguration /System.Applicationhost/Sites/SiteDefaults/logfile | select dir* | Out-String
-        $blank | Out-file  C:\temp\$servername.txt -append
-        $linetop | Out-file  C:\temp\$servername.txt -append
-        $iisdef | Out-file  C:\temp\$servername.txt -Append
-        $linebottom | Out-file  C:\temp\$servername.txt -append
-        $iisdef1 | Out-file  C:\temp\$servername.txt -Append   
+        $blank | Out-file  $reportfile -append
+        $linetop | Out-file  $reportfile -append
+        $iisdef | Out-file  $reportfile -Append
+        $linebottom | Out-file  $reportfile -append
+        $iisdef1 | Out-file  $reportfile -Append   
     }
 }
 
@@ -1191,11 +1192,11 @@ function iisfolder
             $iisfldr1 = "E:\inetpub\logs\LogFiles DOES exist"
         }
 
-        $blank | Out-file  C:\temp\$servername.txt -append
-        $linetop | Out-file  C:\temp\$servername.txt -append
-        $iisfldr | Out-file  C:\temp\$servername.txt -Append
-        $linebottom | Out-file  C:\temp\$servername.txt -append
-        $iisfldr1 | Out-file  C:\temp\$servername.txt -Append
+        $blank | Out-file  $reportfile -append
+        $linetop | Out-file  $reportfile -append
+        $iisfldr | Out-file  $reportfile -Append
+        $linebottom | Out-file  $reportfile -append
+        $iisfldr1 | Out-file  $reportfile -Append
     }
 }
 
@@ -1207,11 +1208,11 @@ Function Windowsver
     $windowsversion1 = $global:CPUINfO_.OsName
 
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $windowsversion | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $windowsversion1 | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $windowsversion | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $windowsversion1 | Out-file  $reportfile -append
 
 
 }
@@ -1227,11 +1228,11 @@ Function Check-ink
     
 
 
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $ink | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $InkStatus | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $ink | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $InkStatus | Out-file  $reportfile -append
 
 
 
@@ -1266,11 +1267,11 @@ function Uptime
     $wmi = Get-WmiObject -Class Win32_OperatingSystem
     $lastreboot = ($wmi.ConvertToDateTime($wmi.LastBootUpTime)) | Out-String
     $uptimecheck = "This Server was last rebooted $lastreboot  "  
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $Uptimetitle | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $uptimecheck | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $Uptimetitle | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $uptimecheck | Out-file  $reportfile -append
      
     #Write to Screen
     write-host "`n`n $uptimecheck"  -ForegroundColor yellow
@@ -1301,11 +1302,11 @@ Function get-OU
     $oulocal = Get-ADComputer ($env:COMPUTERNAME) -Properties *                   
                                                                                                                                             
     $OUTitle = [char]0x2551 + "    Organisational Unit for this system.                                    " + [char]0x2551
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $oUTitle | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $oulocal.CanonicalName | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $oUTitle | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $oulocal.CanonicalName | Out-file  $reportfile -append
 }
 
 Function Send-report
@@ -1325,7 +1326,7 @@ Function Send-report
     $emailaddress = [Microsoft.VisualBasic.Interaction]::InputBox('Enter Your Email Address to send Repot to.:', 'Enter Email Address')
 
                 
-    Send-MailMessage -From "Server_QA-Reports@PRDS.QLDPOL" -Subject "QA Report for: $env:computername" -To $emailaddress -Body "QA Report for `n`n   Computername  $env:computername" -Attachments C:\temp\$servername.txt  -Port 25 -SmtpServer smtp.police.qld.gov.au
+    Send-MailMessage -From "Server_QA-Reports@PRDS.QLDPOL" -Subject "QA Report for: $env:computername" -To $emailaddress -Body "QA Report for `n`n   Computername  $env:computername" -Attachments $reportfile  -Port 25 -SmtpServer smtp.police.qld.gov.au
 
 
 }
@@ -1351,123 +1352,134 @@ Function get-Performance
     
 
     $OUTitle = [char]0x2551 + "    Server Performance Settings                                             " + [char]0x2551
-    $blank | Out-file  C:\temp\$servername.txt -append
-    $linetop | Out-file  C:\temp\$servername.txt -append
-    $oUTitle | Out-file  C:\temp\$servername.txt -append
-    $linebottom | Out-file  C:\temp\$servername.txt -append
-    $Perfsettings | Out-file  C:\temp\$servername.txt -append
+    $blank | Out-file  $reportfile -append
+    $linetop | Out-file  $reportfile -append
+    $oUTitle | Out-file  $reportfile -append
+    $linebottom | Out-file  $reportfile -append
+    $Perfsettings | Out-file  $reportfile -append
 }
 
-      
-<#
+function start_QAMain
+{
+    cleanupinstallscripts
+    Scriptver
+    cpu
+    Windowsver
+    IsActivated
+    VMwarecheck
+    memory
+    pagefile
+    networksettings
+    networksettingsipv6
+    NLBsettings
+    Domain
+    get-OU
+    descript
+    BGINFO
+    get-Performance
+    iisfolder
+    iisdefaultlocal
+    Drives
+    networker  # gets networker backup info.
+    check-ink
+    adminpassword
+    Services-check
+    Windozupdates
+    WindowsUpdatesSettings
+    functionsinstalled
+    tasksched
+    CheckNTP
+    softwwareinstalled
+    eventlogerrors
+    Eventlogsettingscheck
+    sharesinfo
+    TrustedForDelegation
+    Uptime
+
+}
+function set-reportinfo
+{     
+    <#
 Start of the MAin part to the Script
 #>
-#sets up what is needed to create the the output enviroment for QA report.
+    #sets up what is needed to create the the output enviroment for QA report.
 
 
-$servername = $env:COMPUTERNAME
-$Scriptver = "QA Script Ver $ver"
-$name = "                                                    $servername"
-$blank = " " 
-Write-host "Installing Powershell AD Tools.  This will be cleaned up at end of process." -ForegroundColor Cyan
+    $servername = $env:COMPUTERNAME
+    $Scriptver = "QA Script Ver $ver"
+    $name = "                                                    $servername"
+    $blank = " " 
+    Write-host "Installing Powershell AD Tools.  This will be cleaned up at end of process." -ForegroundColor Cyan
 
-#gets status of PS AD tools installed or not. 
-$rsat_ad = Get-WindowsFeature RSAT-AD-PowerShell | select -ExpandProperty installstate
-if ($rsat_ad -notmatch 'installed')
-{
-    install-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
-    #Install-WindowsFeature RSAT-AD-Tools
+    #gets status of PS AD tools installed or not. 
+    $rsat_ad = Get-WindowsFeature RSAT-AD-PowerShell | select -ExpandProperty installstate
+    if ($rsat_ad -notmatch 'installed')
+    {
+        install-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
+        #Install-WindowsFeature RSAT-AD-Tools
+    }
+    #check to see if c:\temp Exists for Report.
+    if ( !$( Test-Path c:\temp )) { mkdir 'c:\temp' }
+
+    #Setting up the lines for around titles.
+    $ln1 = [char]0x2554 #Left top
+    $ln2 = [char]0x2557 #Right Top
+    $ln20 = [char]0x2550 #=
+    $ln5 = [char]0x2588 
+    $ln30 = repeat-string $ln20 76
+    $ln40 = repeat-string $ln5 110
+    $linetop = $ln1 + $ln30 + $ln2
+    $ln3 = [char]0x255A #Left bottom
+    $ln4 = [char]0x255D #Right Bottom
+
+    $linebottom = $ln3 + $ln30 + $ln4
+    $line = repeat-string $ln20 110
+    [string]$reportfile = 'c:\temp\' + (get-date -format "yyyy_MM_dd_HH-mm") + '_' + $env:COMPUTERNAME + 'QA_Report.txt'
+
+    #setting up the Title box.
+    $Title1 = $line 
+    $Title2 = $line 
+
+    $Title10 = "                                               " + $servername  
+
+    $Title1  | Out-file  $reportfile 
+    $Title10 | Out-file  $reportfile -append 
+    $Title2 | Out-file  $reportfile -append
+    $blank | Out-file  $reportfile -append
+    $Scriptver | Out-file  $reportfile -append
 }
-#check to see if c:\temp Exists for Report.
-if ( !$( Test-Path c:\temp )) { mkdir 'c:\temp' }
 
-#Setting up the lines for around titles.
-$ln1 = [char]0x2554 #Left top
-$ln2 = [char]0x2557 #Right Top
-$ln20 = [char]0x2550 #=
-$ln5 = [char]0x2588 
-$ln30 = repeat-string $ln20 76
-$ln40 = repeat-string $ln5 110
-$linetop = $ln1 + $ln30 + $ln2
-$ln3 = [char]0x255A #Left bottom
-$ln4 = [char]0x255D #Right Bottom
-
-$linebottom = $ln3 + $ln30 + $ln4
-$line = repeat-string $ln20 110
+function start-cleanup
+{
+    if (!($DontDisplayReport)) #dont sent report switch no used
+    {
+        #Display the Report in Notepad.
+        notepad $reportfile
+    }
+    #Display the Report in Notepad.
+    #notepad $reportfile
+    #Showing on screen where file Report is located.
+    Write-host "`n`nHere is the Reportfile: " $reportfile -BackgroundColor Yellow -ForegroundColor Red 
 
 
-#setting up the Title box.
-$Title1 = $line 
-$Title2 = $line 
-
-$Title10 = "                                               " + $servername  
-
-$Title1  | Out-file  C:\temp\$servername.txt 
-$Title10 | Out-file  C:\temp\$servername.txt -append 
-$Title2 | Out-file  C:\temp\$servername.txt -append
-$blank | Out-file  C:\temp\$servername.txt -append
-$Scriptver | Out-file  C:\temp\$servername.txt -append
+    #Comment this out as well as the line above if you do not want to email the report to you.
+    Write-host ="`n`n To send this report to yourself enter 'send-report' " -BackgroundColor green -ForegroundColor Red 
+    if ($Sendemail) # Sendemail switch used
+    {
+        Send-report 
+    }
+    #cleaning up the Powershell RSAT module.
+    Write-host "Removing Powershell AD Tools.  As installed at start of Script." -ForegroundColor Cyan
+    if ($rsat_ad -notmatch 'installed')
+    {
+        uninstall-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
+    }
+}
 
 #cls
-cleanupinstallscripts
-Scriptver
-cpu
-Windowsver
-IsActivated
-VMwarecheck
-memory
-pagefile
-networksettings
-networksettingsipv6
-NLBsettings
-Domain
-get-OU
-descript
-BGINFO
-get-Performance
-iisfolder
-iisdefaultlocal
-Drives
-networker  # gets networker backup info.
-#filepermission     #No longer changed
-#security           #do not use the /Security Profile now.  2019 is secure by detault.
-check-ink
-adminpassword
-Services-check
-Windozupdates
-WindowsUpdatesSettings
-functionsinstalled
-tasksched
-CheckNTP
-#openview           # Not used now.
-softwwareinstalled
-eventlogerrors
-Eventlogsettingscheck
-sharesinfo
-TrustedForDelegation
-Uptime
+#runs the main part of the Script.
+set-reportinfo
+start_QAMain
 
+start-cleanup # Always run at the end
 
-if (!($DontDisplayReport)) #dont sent report switch no used
-{
-    #Display the Report in Notepad.
-    notepad C:\temp\$servername.txt
-}
-#Display the Report in Notepad.
-#notepad C:\temp\$servername.txt
-#Showing on screen where file Report is located.
-Write-host "`n`n$env:computername.txt file is located in c:\temp" -BackgroundColor Yellow -ForegroundColor Red 
-
-
-#Comment this out as well as the line above if you do not want to email the report to you.
-Write-host ="`n`n To send this report to yourself enter 'send-report' " -BackgroundColor green -ForegroundColor Red 
-if ($Sendemail) # Sendemail switch used
-{
-    Send-report 
-}
-#cleaning up the Powershell RSAT module.
-Write-host "Removing Powershell AD Tools.  As installed at start of Script." -ForegroundColor Cyan
-if ($rsat_ad -notmatch 'installed')
-{
-    uninstall-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
-}
