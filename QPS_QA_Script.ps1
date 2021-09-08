@@ -130,6 +130,8 @@
             1.61     06 Sept   2021   Lawrence       Fixed issue with Time Sync         
             1.62     06 Sept   2021   Lawrence       fixed how disks are shown  now shows Mount point Disks if they exist.                        
             1.63     06 Sept   2021   Lawrence       fixed Network to show Mask
+            1.64     06 Sept   2021   Lawrence       Added Networker check
+            
 
 
 
@@ -153,7 +155,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.63"     
+$Global:ver = "1.64"     
 
 
 
@@ -553,6 +555,63 @@ Function adminpassword
     $adminpwd1 | Out-file  C:\temp\$servername.txt -Append  
 }
 
+function networker
+{
+    Write-host "Processing..Backup Networker setup Check"-ForegroundColor green
+    $FDQNAME = $global:CPUINfO_.csname + '.' + $global:CPUINfO_.CsDomain 
+    #creating networker command file.
+    [string]$networkercheck = ". type:NSR client;name: $FDQNAME
+show name
+show protection group list
+print
+
+"
+
+    $networkercheck | Out-File C:\Temp\networkercheck.nsr -Encoding utf8
+
+    #VChecking against Prod  networker Server
+    $found11 = nsradmin -s qps-ntw-pr-11.prds.qldpol -i  c:\temp\networkercheck.nsr
+    #VChecking against DEV networker Server
+
+    try
+    {
+        $found12 = nsradmin -s qps-ntw-pr-12.prds.qldpol -i  c:\temp\networkercheck.nsr
+        if ($found12 | select-string -pattern 'No resources found')
+        { 
+            $found12 = 'Backups Not found on DEV Networker Server qps-ntw-pr-12.prds.qldpol' 
+        
+        }
+    }
+    
+    catch
+    {
+        $found12 = "Networker Server qps-ntw-pr-12.prds.qldpol Appears to be off line." 
+    }
+
+    if ($found11 | select-string -pattern 'No resources found')
+    { 
+        $found11 = 'Backups Not found on Prod Networker Server qps-ntw-pr-11.prds.qldpol' 
+    }
+
+
+    if ($found12 | select-string -pattern 'No resources found')
+    { 
+        $found12 = 'Backups Not found on DEV Networker Server qps-ntw-pr-12.prds.qldpol' 
+    }
+
+
+    
+
+    $anetworkert = [char]0x2551 + "    Networker Backup Status                                                 " + [char]0x2551
+                 
+    $blank | Out-file  C:\temp\$servername.txt -append
+    $linetop | Out-file  C:\temp\$servername.txt -append
+    $anetworkert | Out-file  C:\temp\$servername.txt -Append
+    $lineBottom | Out-file  C:\temp\$servername.txt -append
+    $found11 | Out-file  C:\temp\$servername.txt -Append
+    $blank | Out-file  C:\temp\$servername.txt -append 
+    $found12 | Out-file  C:\temp\$servername.txt -Append 
+}
 
 FUNCTION DRIVES
 {
@@ -1348,6 +1407,7 @@ get-Performance
 iisfolder
 iisdefaultlocal
 Drives
+networker  # gets networker backup info.
 #filepermission     #No longer changed
 #security           #do not use the /Security Profile now.  2019 is secure by detault.
 adminpassword
