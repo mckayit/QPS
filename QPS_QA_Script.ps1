@@ -130,8 +130,8 @@
             1.61     06 Sept   2021   Lawrence       Fixed issue with Time Sync         
             1.62     06 Sept   2021   Lawrence       fixed how disks are shown  now shows Mount point Disks if they exist.                        
             1.63     06 Sept   2021   Lawrence       fixed Network to show Mask
-            1.64     06 Sept   2021   Lawrence       Added Networker check
-            
+            1.64     08 Sept   2021   Lawrence       Added Networker check
+            1.65     09 Sept   2021   Lawrence       Added Check for In Workspace is disabled            
 
 
 
@@ -155,7 +155,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.64"     
+$Global:ver = "1.65"     
 
 
 
@@ -168,7 +168,7 @@ write-host  "  *********************************" -ForegroundColor Green
 Write-host  "  *   QA Script Version is $ver   *" -ForegroundColor GREEN
 Write-host  "  *********************************`n`n`n" -ForegroundColor Green
      
-
+$FormatEnumerationLimit = -1  # setting the emuration to be unlimited
 get-process notepad | stop-process
 clear
 
@@ -695,8 +695,8 @@ function Windozupdates
     $linetop | Out-file  C:\temp\$servername.txt -append
     $winhotfix | Out-file  C:\temp\$servername.txt -Append
     $linebottom | Out-file  C:\temp\$servername.txt -append
-    Write-output "$(($winhotfix1).count) updates Installed"  | Out-file  C:\temp\$servername.txt -Append  
-    $winhotfix1 | select "HotfixID", "InstalledON"  | Out-file  C:\temp\$servername.txt -Append 
+    Write-output "$(($global:CPUINfO_.OsHotFixes).count) updates Installed"  | Out-file  C:\temp\$servername.txt -Append  
+    $global:CPUINfO_.OsHotFixes  | Out-file  C:\temp\$servername.txt -Append 
 
 }
 function WindowsUpdatesSettings
@@ -1216,6 +1216,27 @@ Function Windowsver
 
 }
 
+
+Function Check-ink
+{
+
+    $ink1 = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace\" -ErrorAction silentlycontinue
+    if ($ink1.AllowWindowsInkWorkspace -ne '0') { $inkStatus = "Ink is still active." }
+    if ($ink1.AllowWindowsInkWorkspace -eq '0') { $inkstatus = "Ink is Disabled." }
+    $ink = [char]0x2551 + "    Checking Windows Status                                                 " + [char]0x2551
+    
+
+
+    $blank | Out-file  C:\temp\$servername.txt -append
+    $linetop | Out-file  C:\temp\$servername.txt -append
+    $ink | Out-file  C:\temp\$servername.txt -append
+    $linebottom | Out-file  C:\temp\$servername.txt -append
+    $InkStatus | Out-file  C:\temp\$servername.txt -append
+
+
+
+
+}
 Function Cleanup-install-folders
 {
     param(
@@ -1410,6 +1431,7 @@ Drives
 networker  # gets networker backup info.
 #filepermission     #No longer changed
 #security           #do not use the /Security Profile now.  2019 is secure by detault.
+check-ink
 adminpassword
 Services-check
 Windozupdates
