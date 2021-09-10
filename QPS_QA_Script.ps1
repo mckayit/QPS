@@ -1361,6 +1361,55 @@ Function get-Performance
 
 function start_QAMain
 {
+    <#
+Start of the MAin part to the Script
+#>
+    #sets up what is needed to create the the output enviroment for QA report.
+
+
+    $servername = $env:COMPUTERNAME
+    $Scriptver = "QA Script Ver $ver"
+    $name = "                                                    $servername"
+    $blank = " " 
+    Write-host "Installing Powershell AD Tools.  This will be cleaned up at end of process." -ForegroundColor Cyan
+
+    #gets status of PS AD tools installed or not. 
+    $rsat_ad = Get-WindowsFeature RSAT-AD-PowerShell | select -ExpandProperty installstate
+    if ($rsat_ad -notmatch 'installed')
+    {
+        install-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
+        #Install-WindowsFeature RSAT-AD-Tools
+    }
+    #check to see if c:\temp Exists for Report.
+    if ( !$( Test-Path c:\temp )) { mkdir 'c:\temp' }
+
+    #Setting up the lines for around titles.
+    $ln1 = [char]0x2554 #Left top
+    $ln2 = [char]0x2557 #Right Top
+    $ln20 = [char]0x2550 #=
+    $ln5 = [char]0x2588 
+    $ln30 = repeat-string $ln20 76
+    $ln40 = repeat-string $ln5 110
+    $linetop = $ln1 + $ln30 + $ln2
+    $ln3 = [char]0x255A #Left bottom
+    $ln4 = [char]0x255D #Right Bottom
+
+    $linebottom = $ln3 + $ln30 + $ln4
+    $line = repeat-string $ln20 110
+    
+    #setting up the Title box.
+    $Title1 = $line 
+    $Title2 = $line 
+
+    $Title10 = "                                               " + $servername  
+
+    $Title1  | Out-file  $reportfile 
+    $Title10 | Out-file  $reportfile -append 
+    $Title2 | Out-file  $reportfile -append
+    $blank | Out-file  $reportfile -append
+    $Scriptver | Out-file  $reportfile -append
+
+    #functions to run.
     cleanupinstallscripts
     Scriptver
     cpu
@@ -1399,54 +1448,7 @@ function start_QAMain
 }
 function set-reportinfo
 {     
-    <#
-Start of the MAin part to the Script
-#>
-    #sets up what is needed to create the the output enviroment for QA report.
-
-
-    $servername = $env:COMPUTERNAME
-    $Scriptver = "QA Script Ver $ver"
-    $name = "                                                    $servername"
-    $blank = " " 
-    Write-host "Installing Powershell AD Tools.  This will be cleaned up at end of process." -ForegroundColor Cyan
-
-    #gets status of PS AD tools installed or not. 
-    $rsat_ad = Get-WindowsFeature RSAT-AD-PowerShell | select -ExpandProperty installstate
-    if ($rsat_ad -notmatch 'installed')
-    {
-        install-windowsfeature RSAT-AD-PowerShell 2>&1 | Out-Null
-        #Install-WindowsFeature RSAT-AD-Tools
-    }
-    #check to see if c:\temp Exists for Report.
-    if ( !$( Test-Path c:\temp )) { mkdir 'c:\temp' }
-
-    #Setting up the lines for around titles.
-    $ln1 = [char]0x2554 #Left top
-    $ln2 = [char]0x2557 #Right Top
-    $ln20 = [char]0x2550 #=
-    $ln5 = [char]0x2588 
-    $ln30 = repeat-string $ln20 76
-    $ln40 = repeat-string $ln5 110
-    $linetop = $ln1 + $ln30 + $ln2
-    $ln3 = [char]0x255A #Left bottom
-    $ln4 = [char]0x255D #Right Bottom
-
-    $linebottom = $ln3 + $ln30 + $ln4
-    $line = repeat-string $ln20 110
-    [string]$reportfile = 'c:\temp\' + (get-date -format "yyyy_MM_dd_HH-mm") + '_' + $env:COMPUTERNAME + 'QA_Report.txt'
-
-    #setting up the Title box.
-    $Title1 = $line 
-    $Title2 = $line 
-
-    $Title10 = "                                               " + $servername  
-
-    $Title1  | Out-file  $reportfile 
-    $Title10 | Out-file  $reportfile -append 
-    $Title2 | Out-file  $reportfile -append
-    $blank | Out-file  $reportfile -append
-    $Scriptver | Out-file  $reportfile -append
+   
 }
 
 function start-cleanup
@@ -1477,8 +1479,12 @@ function start-cleanup
 }
 
 #cls
+#set reportfile
+[string]$reportfile = 'c:\temp\' + (get-date -format "yyyy_MM_dd_HH-mm") + '_' + $env:COMPUTERNAME + 'QA_Report.txt'
+
 #runs the main part of the Script.
-set-reportinfo
+
+
 start_QAMain
 
 start-cleanup # Always run at the end
