@@ -42,28 +42,45 @@ function start-DomainCleanup_old_Computer_objects
 
     begin
     {
-        process 
+
+    }  
+
+    process 
+    {
+        #Progress bar setup
+        $i = 1 
+        foreach ($server in $servers)
         {
-            foreach ($server in $servers)
-            {
+            $paramWriteProgress = @{
 
-                try
-                {
-                    ## removes the Ad object and leaf object if exist without prompting. 
-                    get-adcomputer $server | remove-adobject -Recursive -Confirm:$false 
-
-                    $done = 'AD Clean up Passed'
-                }
-
-                catch { $done = 'AD Clean up Failed.' }
-
-                [PSCustomObject]@{Servername_ = $server
-                    Cleanup_Status            = $done
-                }
-
+                
+                Activity        = 'Removing AD Computer Object from AD'
+                Status          = "Processing [$i] of [$($Servers.Count)] computers"
+                PercentComplete = (($i / $Servers.Count) * 100)
+                                
             }
+                            
+            Write-Progress @paramWriteProgress
+                        
+            $i++
+            #Progress bar End.
+            try
+            {
+                ## removes the Ad object and leaf object if exist without prompting. 
+                get-adcomputer $server | remove-adobject -Recursive -Confirm:$false 
+
+                $done = 'AD Clean up Passed'
+            }
+
+            catch { $done = 'AD Clean up Failed.' }
+
+            [PSCustomObject]@{Servername_ = $server
+                Cleanup_Status            = $done
+            }
+
         }
     }
+    
     end
     {
 
