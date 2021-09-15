@@ -133,6 +133,7 @@
             1.64     08 Sept   2021   Lawrence       Added Networker check
             1.65     09 Sept   2021   Lawrence       Added Check for In Workspace is disabled
                                                      Output file now has date_time in the name so you can see when it was run ans see multi reports as you work.            
+            1.66     15 Sept   2021   Lawrence       fixed up Networker display  now shows if backup is present and on what server.
 
 
 
@@ -156,7 +157,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.65"     
+$Global:ver = "1.66"     
 
 
 
@@ -560,6 +561,7 @@ function networker
 {
     Write-host "Processing..Backup Networker setup Check"-ForegroundColor green
     $FDQNAME = $global:CPUINfO_.csname + '.' + $global:CPUINfO_.CsDomain 
+   
     #creating networker command file.
     [string]$networkercheck = ". type:NSR client;name: $FDQNAME
 show name
@@ -570,48 +572,35 @@ print
 
     $networkercheck | Out-File C:\Temp\networkercheck.nsr -Encoding utf8
 
-    #VChecking against Prod  networker Server
+    ## Checking against Prod  networker Server
     $found11 = nsradmin -s qps-ntw-pr-11.prds.qldpol -i  c:\temp\networkercheck.nsr
-    #VChecking against DEV networker Server
-
-    try
-    {
-        $found12 = nsradmin -s qps-ntw-pr-12.prds.qldpol -i  c:\temp\networkercheck.nsr
-        if ($found12 | select-string -pattern 'No resources found')
-        { 
-            $found12 = 'Backups Not found on DEV Networker Server qps-ntw-pr-12.prds.qldpol' 
-        
-        }
-    }
     
-    catch
-    {
-        $found12 = "Networker Server qps-ntw-pr-12.prds.qldpol Appears to be off line." 
-    }
-
-    if ($found11 | select-string -pattern 'No resources found')
+    ## checking to see if backup exist in DEV
+    $found12 = nsradmin -s qps-ntw-pr-12.prds.qldpol -i  c:\temp\networkercheck.nsr
+  
+    ## setting No backups found as Default.
+    $Bakupfound = "No Networker backups found for $FDQNAME"
+  
+    ## Setting results to be outputed. 
+    if ($found12 | select-string -pattern 'No resources found' -NotMatch)
     { 
-        $found11 = 'Backups Not found on Prod Networker Server qps-ntw-pr-11.prds.qldpol' 
+        $Bakupfound = 'Backups found for:' + $FDQNAME + ' on  DEV Networker Server qps-ntw-pr-12.prds.qldpol' 
     }
 
-
-    if ($found12 | select-string -pattern 'No resources found')
+    if ($found11 | select-string -pattern 'No resources found' -NotMatch)
     { 
-        $found12 = 'Backups Not found on DEV Networker Server qps-ntw-pr-12.prds.qldpol' 
+        $Bakupfound = 'Backups found for: ' + $FDQNAME + ' on Prod Networker Server qps-ntw-pr-11.prds.qldpol' 
     }
-
-
-    
 
     $anetworkert = [char]0x2551 + "    Networker Backup Status                                                 " + [char]0x2551
-                 
+    ## output
     $blank | Out-file  $reportfile -append
     $linetop | Out-file  $reportfile -append
     $anetworkert | Out-file  $reportfile -Append
     $lineBottom | Out-file  $reportfile -append
-    $found11 | Out-file  $reportfile -Append
-    $blank | Out-file  $reportfile -append 
-    $found12 | Out-file  $reportfile -Append 
+    $blank | Out-file  $reportfile -append
+    $Bakupfound | Out-file  $reportfile -Append
+   
 }
 
 FUNCTION DRIVES
