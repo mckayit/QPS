@@ -560,6 +560,7 @@ Function adminpassword
 function networker
 {
     Write-host "Processing..Backup Networker setup Check"-ForegroundColor green
+    ## setting FDQName
     $FDQNAME = $global:CPUINfO_.csname + '.' + $global:CPUINfO_.CsDomain 
    
     #creating networker command file.
@@ -582,12 +583,12 @@ print
     $Bakupfound = "No Networker backups found for $FDQNAME"
   
     ## Setting results to be outputed. 
-    if ($found12 | select-string -pattern 'No resources found' -NotMatch)
+    if (!($found12 | select-string -pattern 'No resources found'))
     { 
         $Bakupfound = 'Backups found for:' + $FDQNAME + ' on  DEV Networker Server qps-ntw-pr-12.prds.qldpol' 
     }
 
-    if ($found11 | select-string -pattern 'No resources found' -NotMatch)
+    if (!($found11 | select-string -pattern 'No resources found'))
     { 
         $Bakupfound = 'Backups found for: ' + $FDQNAME + ' on Prod Networker Server qps-ntw-pr-11.prds.qldpol' 
     }
