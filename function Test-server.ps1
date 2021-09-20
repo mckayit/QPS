@@ -1,6 +1,6 @@
 function Test-server
 {
-
+    #... copies Tests Server to se eif it is up or not and if can be Decomm'd
     <#
     here is how i get the Details for the different domains
 
@@ -10,7 +10,7 @@ function Test-server
         $DESQLD = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' -server desqld.internal  -Credential $desqldcreds -Properties description, OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged , PasswordExpired , PasswordLastSet , LastLogonDate | select CanonicalName, DistinguishedName, DNSHostName, Enabled, IPv4Address, Name, Description, OperatingSystem, OperatingSystemServicePack, OperatingSystemVersion, whenchanged, PasswordExpired , PasswordLastSet , LastLogonDate
         write-host "found " $desqld.count
         write-host '   Getting Servers from DVDS' -ForegroundColor green
-        $DVDS = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' -Server dvds.devpol -Credential $dvdscreds -Properties description, OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged , PasswordExpired , PasswordLastSet , LastLogonDate | select CanonicalName, DistinguishedName, DNSHostName, Enabled, IPv4Address, Name, Description, OperatingSystem, OperatingSystemServicePack, OperatingSystemVersion, whenchanged, PasswordExpired , PasswordLastSet , LastLogonDate
+        $DVDS = Get-ADComputer  -Filter 'operatingsystem -like "*server*" '  -Properties description, OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged , PasswordExpired , PasswordLastSet , LastLogonDate | select CanonicalName, DistinguishedName, DNSHostName, Enabled, IPv4Address, Name, Description, OperatingSystem, OperatingSystemServicePack, OperatingSystemVersion, whenchanged, PasswordExpired , PasswordLastSet , LastLogonDate
         write-host "found " $dvds.count
 
         write-host '   Getting Servers from ACDS' -ForegroundColor green
