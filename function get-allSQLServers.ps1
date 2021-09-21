@@ -42,7 +42,7 @@ function get-allSQLServers
 
 #>
     $servers = get-adcomputer -Filter { Name -like "*sql*" } 
-    $i
+    $i = 1
     foreach ($server in $servers)
     {
         $paramWriteProgress = @{
@@ -62,17 +62,36 @@ function get-allSQLServers
 
             $installed = invoke-command -computername $server.dnshostname { Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object { $_.displayname -like "Microsoft SQL Server * Setup (English)" } | Sort-Object displayname | Select-Object DisplayName, Publisher } -ErrorAction SilentlyContinue
 
+            #sql instance
+       
 
             foreach ($Instal in $installed)
             {
                 if ($instal.displayname -like "Microsoft SQL Server * Setup (English)")
                 {
 
-                    [PSCustomObject] @{
-                        servername = $server.name
-                        SQLAPP     = $instal.displayname
 
+                    $pspath = invoke-command -computername $server.dnshostname { (get-itemproperty 'HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\*').pschildname }
+                    foreach ($ps in $pspath)
+                    {
+
+                  
+                        $ps1 = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\$ps"
+                        
+
+
+                        $SQLInstances = invoke-command -computername $server.dnshostname -scriptblock { gi ($using:ps1) }
+                        [PSCustomObject] @{
+                            "servername"        = $server.name
+                            "SQLAPP"            = $instal.displayname
+                            "Domain"            = $env:USERDNSDOMAIN
+                            "Instance name"     = $SQLInstances.pschildname
+                            "Instance Property" = $SQLInstances.property 
+                        }
                     }
+
+
+                    
                 }
             }
 
