@@ -1,5 +1,6 @@
 function start-DomainCleanup_old_Computer_objects
-<#
+{
+    <#
  #... Removes AD computer objects from a Domain
 .SYNOPSIS
     Removes AD computer objects from a Domain
@@ -32,7 +33,7 @@ function start-DomainCleanup_old_Computer_objects
     0.0.1           14 Sept 2021        Lawrence       Initial Coding
 
 #>
-{
+
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true,
@@ -72,7 +73,11 @@ function start-DomainCleanup_old_Computer_objects
                 $done = 'AD Clean up Passed'
             }
 
-            catch { $done = 'AD Clean up Failed.' }
+            catch
+            {
+                $done = "AD Clean up Failed: $($error[0].Exception.Message)"
+                Write-Host "AD Clean up Failed.' : $($error[0].Exception.Message)" -ForegroundColor White -BackgroundColor red
+            }
 
             [PSCustomObject]@{Servername_ = $server
                 Cleanup_Status            = $done

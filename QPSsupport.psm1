@@ -447,7 +447,7 @@ function Get-AllServerOS_from_Domains
         write-host "found " $acds.count
 
         write-host '   Getting Server Names from PRDS' -ForegroundColor green
-        $names = Get-ADComputer -Filter 'operatingsystem -like "*server*" ' -server prds.qldpol -Credential $PRDSCREDS | Select-Object -ExpandProperty name
+        $names = Get-ADComputer -Filter 'operatingsystem -like "*server*" ' -server prds.qldpol  | Select-Object -ExpandProperty name
         write-host "PRDS A found " $names.count
         $i = 1
         $prds = foreach ($name in $names)
@@ -463,7 +463,7 @@ function Get-AllServerOS_from_Domains
             Write-Progress @paramWriteProgress
                         
             $i++
-            Get-ADComputer -Identity $name -server prds.qldpol -Credential $PRDSCREDS -Properties OperatingSystem , OperatingSystemVersion, IPv4Address, whenchanged
+            Get-ADComputer -Identity $name -server prds.qldpol  -Properties OperatingSystem , OperatingSystemVersion, IPv4Address, whenchanged
         }
         write-host "found prds B " $prds.count
         #        $prds = Get-ADComputer -ResultPageSize 999999 -Filter 'operatingsystem -like "*server*" ' -server prds.qldpol -Credential $PRDSCREDS -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged
@@ -680,4 +680,136 @@ function get-allSQLServers
             }
         }
     }
+}
+
+
+function get-dcinfo
+{
+    <#
+     #... Get all the DC's and os and functional Level.
+    .SYNOPSIS
+   Get all the DC's and os and functional Level.
+    
+    .DESCRIPTION
+    Get all the DC's and os and functional Level.
+    
+    .EXAMPLE
+    get-dcinfo
+    
+    .NOTES
+    General notes
+    #>
+    
+    $DCs = (get-addomain).ReplicaDirectoryServers | ForEach { Get-ADDomainController -Identity $_ | Select-Object name, OperatingSystem }
+    #$DCs = Get-ADDomainController -filter * | Select-Object name, OperatingSystem
+    $domainname = $env:USERDNSDOMAIN
+    $DomainMode = Get-ADDomain | select -ExpandProperty DomainMode
+    $forestLevel = Get-ADForest | select -ExpandProperty ForestMode
+
+    foreach ($DC in $DCs)
+    {
+
+        [PSCustomObject] @{
+            servername      = $dc.name
+            OS              = $dc.OperatingSystem
+            DomainName      = $env:USERDNSDOMAIN
+            FunctionalLevel = $DomainMode 
+            ForestLevel     = $forestLevel
+
+        }
+    }
+
+}
+
+
+function get-disksizeWithMountpoints
+{
+    <#
+ #... get All Moiuntpoints on a system
+.SYNOPSIS
+    get all mount points of disks on a system
+.DESCRIPTION
+    displays all disks sizings that are Fixed disk type. (3)  
+    this will also show the disks that have mountpoints and where thewy are mounted.. 
+    
+.PARAMETER one
+    Specifies Pram details.
+.PARAMETER two
+    Specifies Pram details
+.PARAMETER InputObject
+    Specifies the object to be processed.  You can also pipe the objects to this command.
+.EXAMPLE
+    C:\PS>
+    Example of how to use this cmdlet
+.INPUTS
+    Inputs to this cmdlet (if any)
+.OUTPUTS
+    Output from this cmdlet (if any)
+.NOTES
+    
+    Lawrence McKay
+    Lawrence@mckayit.com
+    McKayIT Solutions Pty 
+     
+    Date:    9 aug 2021
+      
+     ******* Update Version number below when a change is done.*******
+     
+    History
+    Version         Date                Name           Detail
+    ---------------------------------------------------------------------------------------
+    0.0.1           9 Aug 2021         Lawrence       Initial Coding
+
+#>
+     
+  
+
+    begin 
+    {
+        #Setting the info on how the sizing are done.
+                  
+    }
+    
+    process 
+    {
+
+        try
+        {
+            $volumes = Get-WmiObject win32_volume -Filter "DriveType='3'" | Sort-Object DriveLetter # -Descending
+
+
+            foreach ($volume in $volumes)
+            {
+                $TotalGB = [math]::round(($volume.Capacity / 1gb), 2) 
+            
+                $FreeGB = [math]::round(($volume.FreeSpace / 1Gb), 2) 
+        
+                $FreePerc = [math]::round(((($volume.FreeSpace / 1GB) / ($volume.Capacity / 1GB)) * 100), 0) 
+    
+                [PSCustomObject] @{
+                    Name            = $volume.name
+                    Label           = $volume.label
+                    DriveLetter     = $volume.driveletter
+                    FileSystem      = $volume.filesystem
+                    "Capacity(GB)"  = $TotalGB
+                    "FreeSpace(GB)" = $FreeGB
+                    "Free(%)"       = $FreePerc
+                }
+            }
+        }
+    
+  
+
+        catch 
+        {
+            Write-Host 'ERROR : $(_.Exception.Message)' -ForegroundColor Magenta
+        }
+
+    }
+
+    end 
+    {
+            
+    }
+
 }
