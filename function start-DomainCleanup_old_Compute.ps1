@@ -75,7 +75,7 @@ function start-DomainCleanup_old_Computer_objects
 
             catch
             {
-                $done = "AD Clean up Failed: $($error[0].Exception.Message)"
+                $done = "AD Clean up Failed: $($error[0].Exception.Message)" 
                 Write-Host "AD Clean up Failed.' : $($error[0].Exception.Message)" -ForegroundColor White -BackgroundColor red
             }
 
@@ -88,6 +88,7 @@ function start-DomainCleanup_old_Computer_objects
     
     end
     {
+        ddd
 
     }
 }

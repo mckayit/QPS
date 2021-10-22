@@ -813,3 +813,61 @@ function get-disksizeWithMountpoints
     }
 
 }
+
+
+function Get-RandomPassword
+{
+    <#
+    Random password creator.
+    Does not use the following Char.   1 I l O 0   Due to to hard to read and mis-typing
+
+creates a 16 char password by default unless you enter more. 
+Will not create Password less than 8 Chars'
+
+    #>
+
+
+    Param(
+        [Parameter(mandatory = $false)]
+        [int]$Length = 16
+    )
+    Begin
+    {
+        if ($Length -lt 8)
+        {
+            Write-host  "Password is to short   must be over 8 char." -ForegroundColor white -BackgroundColor Red
+            break
+        }
+        $Numbers = 2..9
+        $LettersLower = 'abcdefghijkmnopqrstuvwxyz'.ToCharArray()
+        $LettersUpper = 'ABCEDEFHJKLMNPQRSTUVWXYZ'.ToCharArray()
+        $Special = '!@#$%^&*()=+[{}]/?<>'.ToCharArray()
+
+        # For the 4 character types (upper, lower, numerical, and special)
+        $N_Count = [math]::Round($Length * .2)
+        $L_Count = [math]::Round($Length * .4)
+        $U_Count = [math]::Round($Length * .2)
+        $S_Count = [math]::Round($Length * .2)
+    }
+    Process
+    {
+        $Pswrd = $LettersLower | Get-Random -Count $L_Count
+        $Pswrd += $Numbers | Get-Random -Count $N_Count
+        $Pswrd += $LettersUpper | Get-Random -Count $U_Count
+        $Pswrd += $Special | Get-Random -Count $S_Count
+
+        # If the password length isn't long enough (due to rounding), add X special characters
+        # Where X is the difference between the desired length and the current length.
+        if ($Pswrd.length -lt $Length)
+        {
+            $Pswrd += $Special | Get-Random -Count ($Length - $Pswrd.length)
+        }
+
+        # Lastly, grab the $Pswrd string and randomize the order
+        $Pswrd = ($Pswrd | Get-Random -Count $Length) -join ""
+    }
+    End
+    {
+        $Pswrd
+    }
+}
