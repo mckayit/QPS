@@ -871,3 +871,214 @@ Will not create Password less than 8 Chars'
         $Pswrd
     }
 }
+
+function get-serversoftware
+{
+    <#
+ #... Gets the software from Servers
+.SYNOPSIS
+    Gets the software from Servers
+.DESCRIPTION
+    gets the Software via Remote Registry from all the servers imputted in via the Array.
+
+    the array must have the following Fields "ServerName"
+.PARAMETER Servers
+    array must have the following Fields "ServerName"
+
+.PARAMETER InputObject
+    Specifies the object to be processed.  You can also pipe the objects to this command.
+.EXAMPLE
+    C:\PS>Get-serverSoftware -Servers $arrayname
+    C:\PS>Get-serverSoftware -Servers SERVERNAME
+    
+    C:\PS>Get-serverSoftware -Servers $arrayname |export-csv d:\serversoftware.csv 
+    
+.INPUTS
+    Inputs to this cmdlet (if any)
+.OUTPUTS
+    Output from this cmdlet (if any)
+.NOTES
+    
+    Lawrence McKay
+    Lawrence@mckayit.com
+    McKayIT Solutions Pty 
+     
+    Date:    19 May 2021
+      
+     ******* Update Version number below when a change is done.*******
+     
+    History
+    Version         Date                Name           Detail
+    ---------------------------------------------------------------------------------------
+    0.0.1           19 May 2021         Lawrence       Initial Coding
+
+
+
+#>
+     
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true,
+            HelpMessage = 'Enter The Serrver array of Name and SID')]
+        $servers
+    )
+    
+    
+    begin 
+    {
+             
+    }
+    
+    process 
+    {
+        $i = 1
+        foreach ($server in $servers)
+        {
+
+            #progress bar.
+            $paramWriteProgress = @{
+                Activity         = "getting Server info"
+                Status           = "Processing [$i] of [$($Servers.Count)] users"
+                PercentComplete  = (($i / $Servers.Count) * 100)
+                CurrentOperation = "processing the following server : [ $($server)]"
+            }
+            Write-Progress @paramWriteProgress       
+            $i++
+            $app = ""
+            $apps1 = @{}
+
+
+            ### Need to put in some error Checking to capture when it cant get onto Server Eg Blocked or can not find it.
+
+            #New-pssession -ComputerName $server -ErrorAction  Silentlycontinue
+            $apps1 = Invoke-command -computer $Server { Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object Displayname, Publisher, Displayversion, VersionMajor, VersionMinor, Version, HelpLink, IrlInfoAbout, Comments, installDate }
+            $apps1 = $apps1 += Invoke-command -computer $Server { Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object Displayname, Publisher, Displayversion, VersionMajor, VersionMinor, Version, HelpLink, IrlInfoAbout, Comments, installDate }
+   
+   
+          
+
+            foreach ($app in $Apps1 | Select-Object | Where-Object { $_.Displayname.length -gt 2 })
+            {
+            
+               
+                #Outputting it as an array.          
+                [PSCustomObject]@{
+                    ServerName     = $Server
+                    Displayname    = $app.Displayname
+                    Publisher      = $app.Publisher
+                    Displayversion = $app.Displayversion
+                    #    VersionMajor   = $app.VersionMajor
+                    #    VersionMinor   = $app.VersionMinor
+                    #    Version        = $app.Version
+                    #    HelpLink       = $app.HelpLink
+                    #    IrlInfoAbout   = $app.IrlInfoAbout
+                    #    Comments       = $app.Comments
+                    #    installDate    = $app.installDate
+                }
+            }
+  
+        }
+    }
+}
+
+function get-shareinfo
+{
+    #get all Shares
+    $shares = Get-WmiObject -Class Win32_Share 
+    $shareList = New-Object -TypeName System.Collections.ArrayList
+
+    foreach ($share in $shares)
+    {
+  
+        #excluding default shares   
+        if (($share.Name -notmatch '(?im)^[a-z]{1,1}\$') -and ($share.Name -notmatch '(?im)^[admin]{5,5}\$') -and ($share.Name -notmatch '(?im)^[ipc]{3,3}\$') -and ($share.Name -notmatch '(?im)^[print]{5,5}\$') )
+        {      
+    
+            $shareAccessInfo = ''
+            $ntfsAccessInfo = ''    
+    
+            #extract permissions from the current share
+            $fileAccessControlList = Get-Acl -Path $($share.Path) | Select-Object -ExpandProperty Access | Select-Object -Property FileSystemRights, AccessControlType, IdentityReference    
+    
+            #excluding uncritical information as Builtin Accounts as Administratrators, System, NT Service and Trusted installer
+            foreach ($fileAccessControlEntry in $fileAccessControlList)
+            {
+                if (($fileAccessControlEntry.FileSystemRights -notmatch '\d') -and ($fileAccessControlEntry.IdentityReference -notmatch '(?i)Builtin\\Administrators|NT\sAUTHORITY\\SYSTEM|NT\sSERVICE\\TrustedInstaller'))
+                {      
+                    $ntfsAccessInfo += "$($fileAccessControlEntry.IdentityReference); $($fileAccessControlEntry.AccessControlType); $($fileAccessControlEntry.FileSystemRights)" + ' | '  
+                }
+            } #END foreach ($fileAccessControlEntry in $fileAccessControlList)
+
+            $ntfsAccessInfo = $ntfsAccessInfo.Substring(0, $ntfsAccessInfo.Length - 3)
+            $ntfsAccessInfo = $ntfsAccessInfo -replace ',\s?Synchronize', ''   
+    
+            #getting share permissions   
+            $shareSecuritySetting = Get-WmiObject -Class Win32_LogicalShareSecuritySetting -Filter "Name='$($share.Name)'"               
+            $shareSecurityDescriptor = $shareSecuritySetting.GetSecurityDescriptor()
+            $shareAcccessControlList = $shareSecurityDescriptor.Descriptor.DACL          
+    
+            #converting share permissions to be human readable
+            foreach ($shareAccessControlEntry in $shareAcccessControlList)
+            {
+    
+                $trustee = $($shareAccessControlEntry.Trustee).Name      
+                $accessMask = $shareAccessControlEntry.AccessMask
+      
+                if ($shareAccessControlEntry.AceType -eq 0)
+                {
+                    $accessType = 'Allow'
+                }
+                else
+                {
+                    $accessType = 'Deny'
+                }
+        
+                if ($accessMask -match '2032127|1245631|1179817')
+                {          
+                    if ($accessMask -eq 2032127)
+                    {
+                        $accessMaskInfo = 'FullControl'
+                    }
+                    elseif ($accessMask -eq 1179817)
+                    {
+                        $accessMaskInfo = 'Read'
+                    }
+                    elseif ($accessMask -eq 1245631)
+                    {
+                        $accessMaskInfo = 'Change'
+                    }
+                    else
+                    {
+                        $accessMaskInfo = 'unknown'
+                    }
+                    $shareAccessInfo += "$trustee; $accessType; $accessMaskInfo" + ' | '
+                }            
+    
+            } #END foreach($shareAccessControlEntry in $shareAcccessControlList)
+    
+       
+            if ($shareAccessInfo -match '|')
+            {
+                $shareAccessInfo = $shareAccessInfo.Substring(0, $shareAccessInfo.Length - 3)
+            }               
+    
+            #putting extracted information together into a custom object    
+            $myShareHash = @{'Name' = $share.Name }
+            $myShareHash.Add('FileSystemSPath', $share.Path )       
+            $myShareHash.Add('Description', $share.Description)        
+            $myShareHash.Add('NTFSPermissions', $ntfsAccessInfo)
+            $myShareHash.Add('SharePermissions', $shareAccessInfo)
+            $myShareObject = New-Object -TypeName PSObject -Property $myShareHash
+            $myShareObject.PSObject.TypeNames.Insert(0, 'MyShareObject')  
+    
+            #store the custom object in a list    
+            $null = $shareList.Add($myShareObject)
+  
+        } #END if (($share.Name -notmatch '(?im)^[a-z]{1,1}\$') -and ($share.Name -notmatch '(?im)^[admin]{5,5}\$') -and ($share.Name -notmatch '(?im)^[ipc]{3,3}\$') )
+
+    } #END foreach ($share in $shares)
+    $shareList
+} }
+
+
+   
