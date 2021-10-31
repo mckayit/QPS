@@ -7,6 +7,8 @@ function set-ServerShares
 .DESCRIPTION
     reades in a CSV file and then created the Directory structure then shars the DIR
      as per name and applies Default Permissions  Administrators:Full
+
+
 .PARAMETER PATH2CSV
     path to CSV file
 .EXAMPLE
@@ -18,7 +20,7 @@ function set-ServerShares
     Output from this cmdlet (if any)
 .NOTES
 
-the CSV file should have the following 
+The CSV file should have the following 
 EG
 Name	        path	              comment
 APPLICATIONS	D:\APPLICATIONS	      Share Description (Optopnal)
@@ -94,6 +96,7 @@ APPLICATIONS	D:\APPLICATIONS	      Share Description (Optopnal)
     
     end
     {
+        write-host  "*****  Current Shares on Server ****" -ForegroundColor cyan
         Get-SmbShare | select name, path, Description | ft -AutoSize -Wrap 
 
     }
