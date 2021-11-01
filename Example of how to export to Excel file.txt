@@ -1,0 +1,4 @@
+Example on how to export to <#
+
+
+$whatever |Export-Excel -Path c:\tmp\DVDS_servers.xlsx -WorksheetName DVDS_Servers -TableName DVDS_Servers -show
