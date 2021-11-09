@@ -41,7 +41,7 @@ function get-allSQLServers
     0.0.1           21 Sept 2021         Lawrence       Initial Coding
 
 #>
-    $servers = get-adcomputer -Filter { Name -like "*sql*" } 
+    $servers = Get-ADComputer  -Filter 'operatingsystem -like "*server*" ' 
     $i = 1
     foreach ($server in $servers)
     {

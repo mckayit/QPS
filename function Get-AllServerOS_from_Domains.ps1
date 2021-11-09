@@ -83,7 +83,7 @@ function Get-AllServerOS_from_Domains
         write-host "found " $acds.count
 
         write-host '   Getting Server Names from PRDS' -ForegroundColor green
-        $names = Get-ADComputer -Filter 'operatingsystem -like "*server*" ' -server prds.qldpol -Credential $PRDSCREDS | Select-Object -ExpandProperty name
+        $names = Get-ADComputer -Filter 'operatingsystem -like "*server*" ' -server prds.qldpol  | Select-Object -ExpandProperty name
         write-host "PRDS A found " $names.count
         $i = 1
         $prds = foreach ($name in $names)
@@ -99,7 +99,7 @@ function Get-AllServerOS_from_Domains
             Write-Progress @paramWriteProgress
                         
             $i++
-            Get-ADComputer -Identity $name -server prds.qldpol -Credential $PRDSCREDS -Properties OperatingSystem , OperatingSystemVersion, IPv4Address, whenchanged
+            Get-ADComputer -Identity $name -server prds.qldpol -Properties OperatingSystem , OperatingSystemVersion, IPv4Address, whenchanged
         }
         write-host "found prds B " $prds.count
         #        $prds = Get-ADComputer -ResultPageSize 999999 -Filter 'operatingsystem -like "*server*" ' -server prds.qldpol -Credential $PRDSCREDS -Properties OperatingSystem , OperatingSystemServicePack, OperatingSystemVersion, CanonicalName, IPv4Address, whenchanged
