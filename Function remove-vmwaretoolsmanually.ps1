@@ -18,7 +18,7 @@ Function remove-vmwaretoolsmanually
     
 .OUTPUTS
     Output from this cmdlet (if any)
-.NOTES
+.NOTE
     
     Lawrence McKay
     Lawrence@mckayit.com
@@ -173,22 +173,23 @@ Function remove-vmwaretoolsmanually
     {
             
     }
+}
 
-    # Removes the Informational reporting from eventlog
-    remove-informationaleventlogforerrores
+# Removes the Informational reporting from eventlog
+remove-informationaleventlogforerrores
 
-    # removes the VMware tools DIR's
-    remove-QPSFolders -foldername  'C:\Program Files\VMware'
-    remove-QPSFolders -foldername  'C:\ProgramData\VMware' 
+# removes the VMware tools DIR's
+remove-QPSFolders -foldername  'C:\Program Files\VMware'
+remove-QPSFolders -foldername  'C:\ProgramData\VMware' 
 
-    # removes VMware Tools reg keys. 
-    remove-QPSFolders -foldername  "HKLM:\SOFTWARE\VMware, Inc."
-    remove-QPSFolders -foldername  "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{1D060220-2A64-4153-A6F5-C43B95C3BFC7}"
-    remove-QPSFolders -foldername  "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store" 
-    remove-QPSFolders -foldername  "HKLM:\SOFTWARE\Classes\Installer\Products\022060D146A235146A5F4CB3593CFB7C"
-    remove-QPSFolders -foldername  "HKLM:\SOFTWARE\Classes\TypeLib\{6B8C0665-86D9-4DC9-8D58-FABE31A495E3}"
+# removes VMware Tools reg keys. 
+remove-QPSFolders -foldername  "HKLM:\SOFTWARE\VMware, Inc."
+remove-QPSFolders -foldername  "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{1D060220-2A64-4153-A6F5-C43B95C3BFC7}"
+remove-QPSFolders -foldername  "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store" 
+remove-QPSFolders -foldername  "HKLM:\SOFTWARE\Classes\Installer\Products\022060D146A235146A5F4CB3593CFB7C"
+remove-QPSFolders -foldername  "HKLM:\SOFTWARE\Classes\TypeLib\{6B8C0665-86D9-4DC9-8D58-FABE31A495E3}"
 
 
-    #reboots the system within 2 Sec
-    shutdown /r /t 2
+#reboots the system within 2 Sec
+shutdown /r /t 2
 }
