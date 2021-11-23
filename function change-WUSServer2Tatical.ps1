@@ -60,25 +60,27 @@ function change-WUSServer2Tatical
     
     end
     {
-        #  this bit restarts the services so it re-reads in the new REG settings.
-        # 
-        #  note   Reboot will put back the GPO WSUS server.      
-        net stop wuauserv
-        net stop cryptSvc
-        net stop bits
-        net stop msiserver
+           
+        Stop-Service -Name  wuauserv
+        Stop-Service -Name  cryptSvc
+        Stop-Service -Name  bits
+        Stop-Service -Name  msiserver
 
-        del /f /q “%ALLUSERSPROFILE%\Application Data\Microsoft\Network\Downloader\qmgr*.dat”
-        #del /f /s /q %SystemRoot%\SoftwareDistribution\*.*
-        #del /f /s /q %SystemRoot%\system32\catroot2\*.*
-        #del /f /q %SystemRoot%\WindowsUpdate.log
+        del “%ALLUSERSPROFILE%\Application Data\Microsoft\Network\Downloader\qmgr*.dat” -force -ErrorAction SilentlyContinue
+        del  %SystemRoot%\SoftwareDistribution\*.* -Recurse -Force -ErrorAction SilentlyContinue
+        del  %SystemRoot%\system32\catroot2\*.* -Recurse -Force -ErrorAction SilentlyContinue
+        del  %SystemRoot%\WindowsUpdate.log -Force -ErrorAction SilentlyContinue
 
-        net start wuauserv
-        net start cryptSvc
-        net start bits
-        net start msiserver
+        Start-Service -Name wuauserv
+        Start-Service -Name cryptSvc
+        Start-Service -Name bits
+        Start-Service -Name msiserver
            
         #wuinstall -AcceptAll -Install 
+
+        # Launch Windows Update
+        control update
     }
 }
 change-WUSServer2Tatical
+
