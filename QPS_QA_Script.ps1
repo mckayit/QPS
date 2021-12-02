@@ -134,6 +134,7 @@
             1.65     09 Sept   2021   Lawrence       Added Check for In Workspace is disabled
                                                      Output file now has date_time in the name so you can see when it was run ans see multi reports as you work.            
             1.66     15 Sept   2021   Lawrence       fixed up Networker display  now shows if backup is present and on what server.
+            1.67     29 Nov    2012   Lawrence      Added Block size to disks. 
 
 
 
@@ -157,7 +158,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.66"     
+$Global:ver = "1.67"     
 
 
 
@@ -609,12 +610,13 @@ FUNCTION DRIVES
     Write-host "Processing..Checking size of Disks settings."-ForegroundColor green
           
     $drvs = [char]0x2551 + "    Checking size of Disks                                                  " + [char]0x2551 
-    $drvs1 = Get-Volume | sort DriveLetter
-    <# $drvs1 = get-wmiobject win32_volume | where { $_.driveletter -ne 'X:' -and $_.label -ne 'System Reserved' } | sort driveletter | Ft -AutoSize  Driveletter, label, 
-    @{name = "  Disk Size(GB) "; Expression = { "{0,8:N0}" -f ($_.Capacity / 1gb) } } ,
-    @{name = "  Free Disk Size(GB) "; Expression = { "{0,8:N0}" -f ($_.FreeSpace / 1gb) } } ,
-    @{name = "  Block Size (KB) "; Expression = { "{0,8:N0}" -f ($_.Blocksize / 1kb) } } 
-#>
+    #$drvs1 = Get-Volume | sort DriveLetter
+    $drvs1 = Get-Volume | sort DriveLetter | Ft -AutoSize  Driveletter, FileSystemLabel, FileSystemType, DriveType, HealthStatus,
+    @{Name = "Blocksize(KB)"; Expression = { "{0,8:N0}" -f ($_.AllocationUnitSize / 1kb) } },
+    @{Name = "FreeSpace(GB)"; Expression = { "{0,8:N0}" -f ($_.SizeRemaining / 1GB) } },
+    @{Name = "DiskSize(GB)"; Expression = { "{0,8:N0}" -f ($_.Size / 1gb) } }
+
+    
     $blank | Out-file  $reportfile -append
     $linetop | Out-file  $reportfile -append
     $drvs | Out-file  $reportfile -Append
@@ -1348,7 +1350,29 @@ Function get-Performance
     $linebottom | Out-file  $reportfile -append
     $Perfsettings | Out-file  $reportfile -append
 }
+function Test-PendingReboot
+{
+    $OUTitle = "    Does the system require a Reboot"
+    $oUTitle | Out-file  $reportfile -append
+   
 
+    if (Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending" -EA Ignore) { return $true | Out-file  $reportfile -append }
+    if (Get-Item "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired" -EA Ignore) { return $true | Out-file  $reportfile -append }
+    if (Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name PendingFileRenameOperations -EA Ignore) { return $true | Out-file  $reportfile -append }
+    try
+    { 
+        $util = [wmiclass]"\\.\root\ccm\clientsdk:CCM_ClientUtilities"
+        $status = $util.DetermineIfRebootPending()
+        if (($status -ne $null) -and $status.RebootPending)
+        {
+            
+            return $true | Out-file  $reportfile -append
+        }
+    }
+    catch { }
+
+    $false | Out-file  $reportfile -append
+}
 function start_QAMain
 {
     <#
@@ -1434,6 +1458,7 @@ Start of the MAin part to the Script
     sharesinfo
     TrustedForDelegation
     Uptime
+   
 
 }
 function set-reportinfo
