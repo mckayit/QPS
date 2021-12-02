@@ -1254,7 +1254,7 @@ function Uptime
 {
 
     Write-host "Last time System was rebooted Check" -ForegroundColor Green
- 
+
     $Uptimetitle = [char]0x2551 + "    Last time System was rebooted Check                                     " + [char]0x2551
     $wmi = Get-WmiObject -Class Win32_OperatingSystem
     $lastreboot = ($wmi.ConvertToDateTime($wmi.LastBootUpTime)) | Out-String
@@ -1262,7 +1262,9 @@ function Uptime
     $blank | Out-file  $reportfile -append
     $linetop | Out-file  $reportfile -append
     $Uptimetitle | Out-file  $reportfile -append
+
     $linebottom | Out-file  $reportfile -append
+    Test-PendingReboot
     $uptimecheck | Out-file  $reportfile -append
      
     #Write to Screen
@@ -1352,8 +1354,8 @@ Function get-Performance
 }
 function Test-PendingReboot
 {
-    $OUTitle = "    Does the system require a Reboot"
-    $oUTitle | Out-file  $reportfile -append
+    $rbTitle = "Does the system require a Reboot"
+    $rbTitle | Out-file  $reportfile -append
    
 
     if (Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending" -EA Ignore) { return $true | Out-file  $reportfile -append }
@@ -1458,7 +1460,7 @@ Start of the MAin part to the Script
     sharesinfo
     TrustedForDelegation
     Uptime
-   
+
 
 }
 function set-reportinfo
