@@ -135,8 +135,7 @@
                                                      Output file now has date_time in the name so you can see when it was run ans see multi reports as you work.            
             1.66     15 Sept   2021   Lawrence       fixed up Networker display  now shows if backup is present and on what server.
             1.67     29 Nov    2012   Lawrence      Added Block size to disks. 
-
-
+            1.68     02 Dec    2012   Lawrence      Added does system require Reboot Check
 
 
 
@@ -158,7 +157,7 @@ if ($Sendemail) # Sendemail switch used
 
 }
 
-$Global:ver = "1.67"     
+$Global:ver = "1.68"     
 
 
 
