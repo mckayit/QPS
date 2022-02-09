@@ -61,48 +61,62 @@ function get-logonhistory
         [string]$Computer = ($env:CLIENTNAME),
         [int]$Days = 360
     )
-    cls
-    $Result = @()
-    Write-Host "Gathering Event Logs, this can take awhile..."
-    $ELogs = Get-EventLog System -Source Microsoft-Windows-WinLogon -After (Get-Date).AddDays(-$Days)# -ComputerName $Computer
-    If ($ELogs)
+
+    begin
     {
-        Write-Host "Processing..."
-        ForEach ($Log in $ELogs)
+   
+    }
+    process 
+    {
+        cls
+        $Result = @()
+        Write-Host "Gathering Event Logs, this can take awhile..."
+        $ELogs = Get-EventLog System -Source Microsoft-Windows-WinLogon -After (Get-Date).AddDays(-$Days)# -ComputerName $Computer
+        If ($ELogs)
         {
-            If ($Log.InstanceId -eq 7001)
+            Write-Host "Processing..."
+            ForEach ($Log in $ELogs)
             {
-                $ET = "Logon"
-            }
-            <#
+                If ($Log.InstanceId -eq 7001)
+                {
+                    $ET = "Logon"
+                }
+                <#
             ElseIf ($Log.InstanceId -eq 7002)
             {
                 $ET = "Logoff"
             }#>
-            Else
-            {
-                Continue
+                Else
+                {
+                    Continue
+                }
+                $Result += New-Object PSObject -Property @{
+                    Time         = $Log.TimeWritten
+                    'Event Type' = $ET
+                    User         = (New-Object System.Security.Principal.SecurityIdentifier $Log.ReplacementStrings[1]).Translate([System.Security.Principal.NTAccount])
+                }
             }
-            $Result += New-Object PSObject -Property @{
-                Time         = $Log.TimeWritten
-                'Event Type' = $ET
-                User         = (New-Object System.Security.Principal.SecurityIdentifier $Log.ReplacementStrings[1]).Translate([System.Security.Principal.NTAccount])
-            }
+            $global:1 = $Result | Select Time, "Event Type", User |  Sort Time -Descending  #| Out-GridView
+            Write-Host "Done."
         }
-        $global:1 = $Result | Select Time, "Event Type", User |  Sort Time -Descending  #| Out-GridView
-        Write-Host "Done."
+        Else
+        {
+            Write-Host "Problem with $Computer."
+            Write-Host "If you see a 'Network Path not found' error, try starting the Remote Registry service on that computer."
+            Write-Host "Or there are no logon/logoff events (XP requires auditing be turned on)"
+        }
     }
-    Else
-    {
-        Write-Host "Problem with $Computer."
-        Write-Host "If you see a 'Network Path not found' error, try starting the Remote Registry service on that computer."
-        Write-Host "Or there are no logon/logoff events (XP requires auditing be turned on)"
-    }
+    
+
 }
+#creates new file. 
+new-item c:\temp\apps.txt -force -type file | out-null
+#gETS THE OLDES RECORD IN THE eVENTLOG. 
+$EventLogAge = (Get-WinEvent -LogName System -MaxEvents 1 -Oldest | select timecreated).timecreated
 
-
-get-logonhistory -Computer "computername" -Days 360
-Write-output 'Users last logged in (Last 300 days if available in Security eventlog)' | out-file c:\temp\apps.txt 
+get-logonhistory  -Days 360
+Write-output 'Users last logged in (Last 300 days or the oldest record ' | out-file c:\temp\apps.txt -APPEND
+Write-output 'in the eventlog is Event Log dated: ' $EventLogAge.datetime   | out-file c:\temp\apps.txt -APPEND
 $global:1 | ft -auto | out-file c:\temp\apps.txt -Append
 softwwareinstalled
-c:\temp\apps.txt
+notepad c:\temp\apps.txt
