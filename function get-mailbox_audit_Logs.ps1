@@ -59,7 +59,7 @@ function get-mailbox_audit_Logs
         if ($mailbox -eq $null)
         {
             write-host "Getting all mailboxes Onpremise to be Checked" -ForegroundColor cyan
-            $mailbox = get-mailbox -resultsize unlimited
+            $mailbox = get-mailbox -resultsize unlimited | where { $_.servername -match "qps-xch-" }
         }
     }
 
@@ -85,30 +85,33 @@ function get-mailbox_audit_Logs
                 $i++
                 #progress bar End
 
-                $sea = Search-MailboxAuditLog -Identity $mb.name  -ResultSize 10 -ShowDetails
-                if ($sea -ne $null )
+                $search1 = Search-MailboxAuditLog -Identity $mb.name  -ResultSize 10 -ShowDetails
+                if ($search1 -ne $null )
                 {
-                    [PSCustomObject] @{
-                        " "                           = " "
-                        MailboxName                   = $mb.name
-                        IsMailboxEnabled              = $mb.IsMailboxEnabled
-                        HiddenFromAddressListsEnabled = $mb.HiddenFromAddressListsEnabled
-                        RecipientType                 = $mb.RecipientType
-                        RecipientTypedetails          = $mb.RecipientTypedetails
-                        MailboxOwnerUPN               = $sea.MailboxOwnerUPN
-                        Logontype                     = $sea.Logontype
-                        folderpathname                = $sea.folderpathname
-                        ClientInfoString              = $Sea.ClientInfoString
-                        ClientIPAddress               = $Sea.ClientIPAddress
-                        ClientMachineName             = $Sea.ClientMachineName
-                        clientProcessname             = $sea.clientProcessname
-                        internallogontype             = $sea.internallogontype
-                        LogonUserDisplayName          = $sea.LogonUserDisplayName
-                        LastAccessed                  = $sea.LastAccessed
- 
+                    foreach ($sea in $Search1)
+                    {
+                        
+                        $sea | Add-Member -type noteproperty -name "MBname" -value $mb.name
+                        $sea | Add-Member -type noteproperty -name "HiddenfromAddressbook" -value $mb.HiddenFromAddressListsEnabled
+                        $sea  | select  MBname, 
+                        HiddenfromAddressbook,
+                        MailboxResolvedOwnerName,
+                        Operation,
+                        OperationResult,
+                        LogonType,
+                        ExternalAccess,
+                        FolderPathName,
+                        ClientInfoString,
+                        ClientProcessName,
+                        ClientVersion,
+                        InternalLogonType,
+                        MailboxOwnerUPN,
+                        MailboxOwnerSid,
+                        LogonUserDisplayName,
+                        IsValid
+                        
                     }
                 }
-
             }
         }
         catch 
@@ -122,3 +125,6 @@ function get-mailbox_audit_Logs
             
     }
 }
+
+get-mailbox_audit_Logs | export-csv C:\temp\Audit_MB_accessreport.csv -NoTypeInformation
+Send-MailMessage -To sharma.bharat@police.qld.gov.au -From code@prds.qldpol -Attachments C:\temp\Audit_MB_accessreport.csv -Body "QLD 2010 Mailbox  Audit report" -Subject "2010 Audit report" -SmtpServer localhost
