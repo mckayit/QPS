@@ -35,7 +35,7 @@ function get-da
             $AppServerFQDN = $server.AppServerFQDN
         }
        
-        write-host  " "
+
 
         [PSCustomObject] @{
             Agency            = $server.Agency
